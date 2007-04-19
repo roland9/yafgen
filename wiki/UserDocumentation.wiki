@@ -93,26 +93,19 @@ Use the right mouse button to zoom out. Think of the other way around: The image
 
 = Credits = 
 I have used various sources for implementing YaFGen:
-Sun, The Java Tutorials - Creating a GUI with Swing: http://java.sun.com/docs/books/tutorial/uiswing/index.html (especially useful: the chapter “Lesson: Concurrency in Swing”)
-Netbeans, Java Online Documentation
-The excellent book "Fraktale Geometrie" (Hofacker Verlag, 1989) by E. D. Schmitter had stimulated my interest years ago, and has lead finally to this application. Thank you!  
-Mathematische Basteleien, http://www.mathematische-basteleien.de/huepfer.htm – some insights for the Huepfer fractal. A great resource!
+  * Sun, The Java Tutorials - Creating a GUI with Swing: http://java.sun.com/docs/books/tutorial/uiswing/index.html (especially useful: the chapter “Lesson: Concurrency in Swing”)
+  * Netbeans, Java Online Documentation
+  * The excellent book "Fraktale Geometrie" (Hofacker Verlag, 1989) by E. D. Schmitter had stimulated my interest years ago, and has lead finally to this application. Thank you!  
+  * Mathematische Basteleien, http://www.mathematische-basteleien.de/huepfer.htm – some insights for the Huepfer fractal. A great resource!
 
 = Planned Features for Future Releases =
 As always, there are some features I was not able to put into this release. If you find YaFGen useful, let me know, and I might spend some time to implement them.
 
 Some of them are:
-Saving of fractal images
-Saving/loading of input parameters
-Applet version of the application
-Various color profiles
-Animations (e. g. of Julia fractals)
-Antialiasing
+  * Saving of fractal images
+  * Saving/loading of input parameters
+  * Applet version of the application
+  * Various color profiles
+  * Animations (e. g. of Julia fractals)
+  * Antialiasing
 ...
-
-
-
-
-
-
-
