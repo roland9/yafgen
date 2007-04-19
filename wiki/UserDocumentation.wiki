@@ -1,4 +1,4 @@
-#summary YaFGen User Documentation
+#summary YaFGen User Documentation. Please note that you can download a PDF version (with screenshots!) of the documentation from the Downloads section!
 
 = YaFGen - User Manual =
 Version 1.0, created on 11. April 2007, 19:34
@@ -41,7 +41,7 @@ I always wanted to publish an open source program. Java is the programming langu
 I hope you find YaFGen useful. But of course, I cannot 'beat' (and never intented to!) more advanced and sophisticated applications (like XaoS, for instance).
 
 == Where can I get the software from? ==
-From the YaFGen home page.
+From the YaFGen home page http://rgropmair.googlepages.com/yetanotherfractalgenerator or at the Google Code YaFGen project page http://code.google.com/p/yafgen/
 
 = Quick Start =
 == System Requirements, Installing ==
@@ -51,10 +51,10 @@ If you don't know what that means, check out Sun's Java Download website for mor
 I have developed the application using NetBeans 5.5, and J2SE 5.0. But because it does not use any of the 5.0-features of Java, it should also run on J2SE 1.4.
 
 YaFGen was successfully tested on the following platforms:
-Windows XP, with Java todo 
-Ubuntu 6.10, with Java todo version installed
-Ubuntu 7.04 todo
-Mac OS X Version 10.3 with Java todo and Mac OS X Version 10.4 with Java 1.5.0_07 
+  * Windows XP, with Java todo 
+  * Ubuntu 6.10, with Java todo version installed
+  * Ubuntu 7.04 todo
+  * Mac OS X Version 10.3 with Java todo and Mac OS X Version 10.4 with Java 1.5.0_07 
 
 To install, just copy the YaFGen directory todo to any place on your computer. And double click the YaFGen.jar file. That should do it!
 
@@ -63,9 +63,10 @@ Let's produce our first fractal!
 Start YaFGen. You should see two windows side by side. The first one is the window displaying the generated fractal. The second one to the right is the window where you can select the fractal type and change various input parameters.
 
 Here is an example of the output window with the initial Mandelbrot fractal.
-
+todo
 
 Here is a screenshot of the input window.
+todo
 
 One important thing to remember. Whenever you change parameters in the Input Parameters window, just hit the Return key or press the "Repaint" button to - well you guessed it - repaint the fractal. 
 The application validates the input; so if you enter an invalid float value, it will not repaint, until you correct it.
@@ -74,8 +75,10 @@ The application validates the input; so if you enter an invalid float value, it 
 Let's do something more exciting. Select another fractal type by pressing the "Iteration Functions" tab. In this version, there are three "Iteration Functions" implemented: "IFS", "NLF" and "Jumper".
 
 Please select "Jumper", just for fun. In order to have some interesting input values, select one of the default settings, e.g. "Raindrops from Right". I just made up the names after one glass of red wine; sorry if they sound a bit strange ;-)
+todo
 
 Note that by selecting one of the default settings, the corresponding values in the Input Parameters window change. Then hit Return, or press "Repaint". Voilà, you have another marvelous example of a computer generated image!
+todo
 
 In fact, this one should take a while. Basically, it is growing endlessly!
 Remark: There is a value "Sleep" (initially set to 10) that defines how much it slows down the generation of the image. The higher the value, the longer it delays - so that you are able to see the image 'growing'. If you have a slow computer, or want quick results (kind of impatient, are you?), then reduce this value, or even set it to 0. Then there is no delay any more, and your computer is calculating at maximum speed. Well, at least at the maximum speed the Java Virtual Machine gives you.
@@ -106,6 +109,8 @@ Various color profiles
 Animations (e. g. of Julia fractals)
 Antialiasing
 ...
+
+
 
 
 
