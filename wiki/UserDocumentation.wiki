@@ -28,57 +28,53 @@ To contact the author, please send an email to the following address: rgropmair 
 = Overview =
 
 == What is YaFGen? ==
-YaFGen is an acronym, and stands for Yet Another Fractal Generator. It generates images, based on mathematical formulas. For more information about fractals, refer to wikipedia.
+YaFGen is an acronym, and stands for Yet Another Fractal Generator. It generates images, based on mathematical formulas. For more information about fractals, refer to http://en.wikipedia.org/wiki/Fractals.
 It was developed by me, using NetBeans and the Java programming language.
 
 == Why another fractal generator? ==
 If you do some research on the web, you will find _lots_ of applications that generate images of fractals. Some are well maintained and have an active community, others are pretty outdated.
 
 So why did I write _another_ one? Well, to put it in simple words, there are two reasons:
-I am fascinated by fractals, and as a typical software engineer, I have to implement my own tool! 
+I am fascinated by fractals, and as a typical software engineer, I have to implement my own tool!  ;-)
 I always wanted to publish an open source program. Java is the programming language I know best, so there you are! 
 
-I hope you find YaFGen useful. But of course, I cannot 'beat' (and never intented to!) more advanced and sophisticated applications (like XaoS, for instance).
+I hope you find YaFGen useful. But of course, I cannot 'beat' (and never intended to!) more advanced and sophisticated applications (like XaoS, for instance).
 
 == Where can I get the software from? ==
 From the YaFGen home page http://rgropmair.googlepages.com/yetanotherfractalgenerator or at the Google Code YaFGen project page http://code.google.com/p/yafgen/
 
 = Quick Start =
 == System Requirements, Installing ==
-Because YaFGen was written in Java, it should run on any platform that supports a recent Java version. That means, you need to have a Java Runtime Environment installed. Maybe you already have it installed!
+Because YaFGen was written in Java, it should run on any platform that supports a recent Java version. That means, you need to have a Java Runtime Environment (JRE) installed. In most cases, you already have it installed! Just give it a try:
+Download YaFGen_V1.0.zip and extract it to any place on your computer. Double click the YaFGen.jar file. That should do it.
 
-If you don't know what that means, check out Sun's Java Download website for more information or download the JRE for your platform.
+If there is an error, you might not have the required Java environment. Check out Sun's Java Download website for more information or download the JRE for your platform.
 I have developed the application using NetBeans 5.5, and J2SE 5.0. But because it does not use any of the 5.0-features of Java, it should also run on J2SE 1.4.
 
 YaFGen was successfully tested on the following platforms:
-  * Windows XP, with Java todo 
-  * Ubuntu 6.10, with Java todo version installed
-  * Ubuntu 7.04 todo
-  * Mac OS X Version 10.3 with Java todo and Mac OS X Version 10.4 with Java 1.5.0_07 
-
-To install, just copy the YaFGen directory todo to any place on your computer. And double click the YaFGen.jar file. That should do it!
+  * Windows XP, with Java 1.4
+  * Ubuntu 7.04 with Sun Java 1.5 and Sun Java 6
+  * Mac OS X Version 10.3 with Java 1.4 and 10.4 with Java 1.5 
 
 == Your first fractal with YaFGen ==
 Let's produce our first fractal!
-Start YaFGen. You should see two windows side by side. The first one is the window displaying the generated fractal. The second one to the right is the window where you can select the fractal type and change various input parameters.
+Start YaFGen. You should see two windows side by side. The left one is the window displaying the generated fractal. The right one is the parameter window where you can select the fractal type and change various input parameters.
 
 Here is an example of the output window with the initial Mandelbrot fractal.
-todo
+
 
 Here is a screenshot of the input window.
-todo
 
 One important thing to remember. Whenever you change parameters in the Input Parameters window, just hit the Return key or press the "Repaint" button to - well you guessed it - repaint the fractal. 
 The application validates the input; so if you enter an invalid float value, it will not repaint, until you correct it.
+
 
 == Manipulating input parameters ==
 Let's do something more exciting. Select another fractal type by pressing the "Iteration Functions" tab. In this version, there are three "Iteration Functions" implemented: "IFS", "NLF" and "Jumper".
 
 Please select "Jumper", just for fun. In order to have some interesting input values, select one of the default settings, e.g. "Raindrops from Right". I just made up the names after one glass of red wine; sorry if they sound a bit strange ;-)
-todo
 
 Note that by selecting one of the default settings, the corresponding values in the Input Parameters window change. Then hit Return, or press "Repaint". Voilà, you have another marvelous example of a computer generated image!
-todo
 
 In fact, this one should take a while. Basically, it is growing endlessly!
 Remark: There is a value "Sleep" (initially set to 10) that defines how much it slows down the generation of the image. The higher the value, the longer it delays - so that you are able to see the image 'growing'. If you have a slow computer, or want quick results (kind of impatient, are you?), then reduce this value, or even set it to 0. Then there is no delay any more, and your computer is calculating at maximum speed. Well, at least at the maximum speed the Java Virtual Machine gives you.
@@ -92,10 +88,12 @@ Drag a rectangle in the fractal window with the left mouse button to define the 
 Use the right mouse button to zoom out. Think of the other way around: The image will be scaled in a way that it fits into the rectangle you have just defined.
 
 = Credits = 
+Thanks to Diane for some beta-testing on Windows XP.
+
 I have used various sources for implementing YaFGen:
   * Sun, The Java Tutorials - Creating a GUI with Swing: http://java.sun.com/docs/books/tutorial/uiswing/index.html (especially useful: the chapter “Lesson: Concurrency in Swing”)
   * Netbeans, Java Online Documentation
-  * The excellent book "Fraktale Geometrie" (Hofacker Verlag, 1989) by E. D. Schmitter had stimulated my interest years ago, and has lead finally to this application. Thank you!  
+  * The excellent book "Fraktale Geometrie" (Hofacker Verlag, 1989) by E. D. Schmitter had stimulated my interest many years ago, and has lead finally to this application. Thank you!  
   * Mathematische Basteleien, http://www.mathematische-basteleien.de/huepfer.htm – some insights for the Huepfer fractal. A great resource!
 
 = Planned Features for Future Releases =
