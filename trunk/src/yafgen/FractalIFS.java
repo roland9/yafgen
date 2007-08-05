@@ -51,8 +51,8 @@ public class FractalIFS extends FractalIterationFunction {
             k++;
         
         // x[n+1] = MAk * x[n] + Vk;   n>1
-        xNew = fPars.a[k]*xIter + fPars.b[k]*yIter + fPars.e[k];
-        yNew = fPars.c[k]*xIter + fPars.d[k]*yIter + fPars.f[k];
+        xNew = fPars.getA(k)*xIter + fPars.getB(k)*yIter + fPars.getE(k);
+        yNew = fPars.getC(k)*xIter + fPars.getD(k)*yIter + fPars.getF(k);
         
     }
 }
