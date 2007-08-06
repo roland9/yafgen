@@ -92,13 +92,7 @@ public abstract class FractalRasterIteration extends FractalImage {
                         
                         // perform the iteration; note that this is an abstract method
                         int iterations = doIteration(x,y);
-                        
-                        // find out color value by some weird algo
-                        if( iterations != fPars.maxIterations ) {
-                            float floatIterations = (float)iterations/(float)fPars.maxIterations;
-                            c = Color.getHSBColor( floatIterations, 1.0F, 1.0F );
-                        } else
-                            c = Color.BLACK;
+                        c = calcNewColorIterations(iterations);
                         
                         // draw tile on the screen in the specified color
                         graphics.setColor(c);
@@ -130,6 +124,8 @@ public abstract class FractalRasterIteration extends FractalImage {
         return bufferedImage;
         
     }
+
+    
     
     // this is the abstract method that does the iteration
     protected abstract int doIteration(double x, double y);

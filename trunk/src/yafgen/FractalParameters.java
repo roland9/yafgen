@@ -4,7 +4,7 @@
  * Version 1.0, created on 11. April 2007, 19:34
  *
  *
- *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas 
+ *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
  *   Copyright (C) 2007  Roland Gršpmair
  *
  *   This file is part of YaFGen.
@@ -29,28 +29,38 @@
 
 package yafgen;
 
+import java.util.Vector;
+
+
 /**
  *
  * class FractalParameters stores all the values that are changed by the user interface and are
  * important for the calculations
  *
  */
-public class FractalParameters {
+public class FractalParameters implements java.io.Serializable {
     
     // FractalImage: all
-    public int sizeX, sizeY;
-    
-    // RasterIteration: Julia, Mandelbrot, ...
-    public double xMin, xMax, yMin, yMax;
-    public double xFix, yFix;
+    public int sizeX;
+    public int sizeY;
+    public double xMin;
+    public double xMax;
+    public double yMin;
+    public double yMax;
+    public double xFix;
+    public double yFix;
     public double maxLength;
     public int maxIterations;
     
     // NLF and Jumper
     public double xStart;
     public double yStart;
-    public double aFix, bFix, cFix;
-    public double aJFix, bJFix, cJFix;
+    public double aFix;
+    public double bFix;
+    public double cFix;
+    public double aJFix;
+    public double bJFix;
+    public double cJFix;
     public long   range;
     public int    sleep;
     public long   count;
@@ -58,87 +68,108 @@ public class FractalParameters {
     public boolean infiniteLoopInterrupted;
     
     // IFS
-    public double[] a, b, c, d, e, f;
+    private Vector a = new Vector();
+    private Vector b = new Vector();
+    private Vector c = new Vector();
+    private Vector d = new Vector();
+    private Vector e = new Vector();
+    private Vector f = new Vector();
     
+/*    public double[] a;
+    public double[] b;
+    public double[] c;
+    public double[] d;
+    public double[] e;
+    public double[] f;
+ */
     /** Creates a new instance of FractalParameters */
     public FractalParameters() {
         setDefaultParameters(null);
     }
     
     public void setDefaultParameters(FractalImage myFImage) {
+        getA().setSize(6);
+        getB().setSize(6);
+        c.setSize(6);
+        d.setSize(6);
+        e.setSize(6);
+        // todo nštig?
+        getF().setSize(6);
         
         // set the default parameters, no matter what FractalImage type
-        sizeX = 800;
-        sizeY = 600;
+        setSizeX(800);
+        setSizeY(600);
         
-        maxLength = 10.0;
-        maxIterations = 100;
-        xFix = -0.5;
-        yFix = -0.6;
-        xMin = -2.5;
-        xMax = 1.2;
-        yMin = -2.0;
-        yMax = 2.0;
+        setMaxLength(10.0);
+        setMaxIterations(100);
+        setXFix(-0.5);
+        setYFix(-0.6);
+        setXMin(-2.5);
+        setXMax(1.2);
+        setYMin(-2.0);
+        setYMax(2.0);
         
-        xStart = -0.1;
-        yStart = 0.0;
-        aFix = 1.0;
-        bFix = 1.0;
-        range = 10000000L;
-        sleep = 100;
-        count = 1000000L;
-        infiniteLoop = true;
-        infiniteLoopInterrupted = false;
+        setXStart(-0.1);
+        setYStart(0.0);
+        setAFix(1.0);
+        setBFix(1.0);
+        setRange(10000000L);
+        setSleep(100);
+        setCount(1000000L);
+        setInfiniteLoop(true);
+        setInfiniteLoopInterrupted(false);
         
-        aJFix = 150;
-        bJFix = 0.21;
-        cJFix = 100;
+        setAJFix(150);
+        setBJFix(0.21);
+        setCJFix(100);
         
-        a = new double[6];
-        b = new double[6];
-        c = new double[6];
-        d = new double[6];
-        e = new double[6];
-        f = new double[6];
+        /*
+        setA(new double[6]);
+        setB(new double[6]);
+        setC(new double[6]);
+        setD(new double[6]);
+        setE(new double[6]);
+        setF(new double[6]);
+         */
         
-        a[0] = 0.0;  b[0] = 0.0;  c[0] = -0.0;  d[0] = 0.16; e[0] = 0.0;  f[0] = 0.0;
-        a[1] = 0.2;  b[1] =-0.26; c[1] =  0.23; d[1] = 0.22; e[1] = 0.0;  f[1] = 1.6;
-        a[2] =-0.15; b[2] = 0.28; c[2] = 0.26;  d[2] = 0.24; e[2] = 0.0;  f[2] = 0.44;
-        a[3] = 0.85; b[3] = 0.04; c[3] = -0.04; d[3] = 0.85; e[3] = 0.0;  f[3] = 1.6;
-        a[4] = 0.8;  b[4] = 0.1;  c[4] = -0.1;  d[4] = 0.6;  e[4] = 0.1;  f[4] = 0.1;
-        a[5] = 0.8;  b[5] = 0.1;  c[5] = -0.1;  d[5] = 0.6;  e[5] = 0.1;  f[5] = 0.1;
+        setA(0,0.0);  setB(0, 0.0);  setC(0,-0.0);  setD(0,0.16); setE(0,0.0);  setF(0,0.0);
+        setA(1,0.2);   setB(1,-0.26); setC(1,0.23);  setD(1,0.22); setE(1,0.0);  setF(1,1.6);
+        setA(2,-0.15); setB(2,0.28);  setC(2,0.26);  setD(2,0.24); setE(2,0.0);  setF(2,0.44);
+        setA(3,0.85);  setB(3,0.04);  setC(3,-0.04); setD(3,0.85); setE(3,0.0);  setF(3,1.6);
+        setA(4,0.8);   setB(4,0.1);   setC(4,-0.1);  setD(4,0.6);  setE(4,0.1);  setF(4,0.1);
+        setA(5,0.8);   setB(5,0.1);   setC(5,-0.1);  setD(5,0.6);  setE(5,0.1);  setF(5,0.1);
         
         // now overwrite some parameters again, depending on FractalImage type
         if (myFImage instanceof FractalMandelbrot) {
-            xMin = -2.5;
-            xMax = 1.2;
-            yMin = -2.0;
-            yMax = 2.0;
+            setXMin(-2.5);
+            setXMax(1.2);
+            setYMin(-2.0);
+            setYMax(2.0);
         }
         
         if (myFImage instanceof FractalNLF) {
-            xMin = -5;
-            xMax = 9;
-            yMin = -5;
-            yMax = 9;
+            setXMin(-5);
+            setXMax(9);
+            setYMin(-5);
+            setYMax(9);
         }
         
         if (myFImage instanceof FractalIFS) {
-            xMin = -4;
-            xMax = 4;
-            yMin = -2;
-            yMax = 12;
+            setXMin(-4);
+            setXMax(4);
+            setYMin(-2);
+            setYMax(12);
         }
         
         if (myFImage instanceof FractalJumper) {
             // Jumper
-            xMin = -200;
-            xMax = 350;
-            yMin = -200;
-            yMax = 300;
-            aJFix = 150;
-            bJFix = 0.21;
-            cJFix = 100;
+            setXMin(-200);
+            setXMax(350);
+            setYMin(-200);
+            setYMax(300);
+            setAJFix(150);
+            setBJFix(0.21);
+            setCJFix(100);
         }
         
     }
@@ -148,87 +179,368 @@ public class FractalParameters {
         switch(presetIndex){
             
             case 0:
-                xMin = -600;
-                xMax = 60;
-                yMin = -500;
-                yMax = 500;
-                aJFix = 50;
-                bJFix = 0.21;
-                cJFix = 100;
+                setXMin(-600);
+                setXMax(60);
+                setYMin(-500);
+                setYMax(500);
+                setAJFix(50);
+                setBJFix(0.21);
+                setCJFix(100);
                 break;
                 
             case 1:
-                xMin = -200;
-                xMax = 350;
-                yMin = -200;
-                yMax = 300;
-                aJFix = 150;
-                bJFix = 0.21;
-                cJFix = 100;
+                setXMin(-200);
+                setXMax(350);
+                setYMin(-200);
+                setYMax(300);
+                setAJFix(150);
+                setBJFix(0.21);
+                setCJFix(100);
                 break;
                 
             case 2:
-                xMin = -200;
-                xMax = 350;
-                yMin = -200;
-                yMax = 300;
-                aJFix = 250;
-                bJFix = 0.21;
-                cJFix = 100;
+                setXMin(-200);
+                setXMax(350);
+                setYMin(-200);
+                setYMax(300);
+                setAJFix(250);
+                setBJFix(0.21);
+                setCJFix(100);
                 break;
                 
             case 3:
-                xMin = -200;
-                xMax = 0;
-                yMin = -200;
-                yMax = 0;
-                aJFix = 350;
-                bJFix = 0.21;
-                cJFix = 100;
-                sleep = 10;
+                setXMin(-200);
+                setXMax(0);
+                setYMin(-200);
+                setYMax(0);
+                setAJFix(350);
+                setBJFix(0.21);
+                setCJFix(100);
+                setSleep(10);
                 break;
                 
             case 4:
-                xMin = -4;
-                xMax = 4;
-                yMin = -4;
-                yMax = 4;
-                aJFix = 0.01;
-                bJFix = -0.03;
-                cJFix = 0.003;
+                setXMin(-4);
+                setXMax(4);
+                setYMin(-4);
+                setYMax(4);
+                setAJFix(0.01);
+                setBJFix(-0.03);
+                setCJFix(0.003);
                 break;
                 
             case 5:
-                xMin = -3;
-                xMax = 3;
-                yMin = -3;
-                yMax = 3;
-                aJFix = 0.4;
-                bJFix = 1;
-                cJFix = 0;
+                setXMin(-3);
+                setXMax(3);
+                setYMin(-3);
+                setYMax(3);
+                setAJFix(0.4);
+                setBJFix(1);
+                setCJFix(0);
                 break;
                 
             case 6:
-                xMin = -300;
-                xMax = 50;
-                yMin = -200;
-                yMax = 300;
-                aJFix = 500;
-                bJFix = 0.833;
-                cJFix = 110;
+                setXMin(-300);
+                setXMax(50);
+                setYMin(-200);
+                setYMax(300);
+                setAJFix(500);
+                setBJFix(0.833);
+                setCJFix(110);
                 break;
                 
             case 7:
-                xMin = -300;
-                xMax = 50;
-                yMin = -200;
-                yMax = 300;
-                aJFix = 500;
-                bJFix = 0.912341234;
-                cJFix = 110;
+                setXMin(-300);
+                setXMax(50);
+                setYMin(-200);
+                setYMax(300);
+                setAJFix(500);
+                setBJFix(0.912341234);
+                setCJFix(110);
                 break;
                 
         }
         
     }
+    
+    public int getSizeX() {
+        return sizeX;
+    }
+    
+    public void setSizeX(int sizeX) {
+        this.sizeX = sizeX;
+    }
+    
+    public int getSizeY() {
+        return sizeY;
+    }
+    
+    public void setSizeY(int sizeY) {
+        this.sizeY = sizeY;
+    }
+    
+    public double getXMin() {
+        return xMin;
+    }
+    
+    public void setXMin(double xMin) {
+        this.xMin = xMin;
+    }
+    
+    public double getXMax() {
+        return xMax;
+    }
+    
+    public void setXMax(double xMax) {
+        this.xMax = xMax;
+    }
+    
+    public double getYMin() {
+        return yMin;
+    }
+    
+    public void setYMin(double yMin) {
+        this.yMin = yMin;
+    }
+    
+    public double getYMax() {
+        return yMax;
+    }
+    
+    public void setYMax(double yMax) {
+        this.yMax = yMax;
+    }
+    
+    public double getXFix() {
+        return xFix;
+    }
+    
+    public void setXFix(double xFix) {
+        this.xFix = xFix;
+    }
+    
+    public double getYFix() {
+        return yFix;
+    }
+    
+    public void setYFix(double yFix) {
+        this.yFix = yFix;
+    }
+    
+    public double getMaxLength() {
+        return maxLength;
+    }
+    
+    public void setMaxLength(double maxLength) {
+        this.maxLength = maxLength;
+    }
+    
+    public int getMaxIterations() {
+        return maxIterations;
+    }
+    
+    public void setMaxIterations(int maxIterations) {
+        this.maxIterations = maxIterations;
+    }
+    
+    public double getXStart() {
+        return xStart;
+    }
+    
+    public void setXStart(double xStart) {
+        this.xStart = xStart;
+    }
+    
+    public double getYStart() {
+        return yStart;
+    }
+    
+    public void setYStart(double yStart) {
+        this.yStart = yStart;
+    }
+    
+    public double getAFix() {
+        return aFix;
+    }
+    
+    public void setAFix(double aFix) {
+        this.aFix = aFix;
+    }
+    
+    public double getBFix() {
+        return bFix;
+    }
+    
+    public void setBFix(double bFix) {
+        this.bFix = bFix;
+    }
+    
+    public double getCFix() {
+        return cFix;
+    }
+    
+    public void setCFix(double cFix) {
+        this.cFix = cFix;
+    }
+    
+    public double getAJFix() {
+        return aJFix;
+    }
+    
+    public void setAJFix(double aJFix) {
+        this.aJFix = aJFix;
+    }
+    
+    public double getBJFix() {
+        return bJFix;
+    }
+    
+    public void setBJFix(double bJFix) {
+        this.bJFix = bJFix;
+    }
+    
+    public double getCJFix() {
+        return cJFix;
+    }
+    
+    public void setCJFix(double cJFix) {
+        this.cJFix = cJFix;
+    }
+    
+    public long getRange() {
+        return range;
+    }
+    
+    public void setRange(long range) {
+        this.range = range;
+    }
+    
+    public int getSleep() {
+        return sleep;
+    }
+    
+    public void setSleep(int sleep) {
+        this.sleep = sleep;
+    }
+    
+    public long getCount() {
+        return count;
+    }
+    
+    public void setCount(long count) {
+        this.count = count;
+    }
+    
+    public boolean isInfiniteLoop() {
+        return infiniteLoop;
+    }
+    
+    public void setInfiniteLoop(boolean infiniteLoop) {
+        this.infiniteLoop = infiniteLoop;
+    }
+    
+    public boolean isInfiniteLoopInterrupted() {
+        return infiniteLoopInterrupted;
+    }
+    
+    public void setInfiniteLoopInterrupted(boolean infiniteLoopInterrupted) {
+        this.infiniteLoopInterrupted = infiniteLoopInterrupted;
+    }
+    
+    public void setA(int index, Object x) {
+        this.getA().setElementAt(x,index);
+    }
+    
+    public void setB(int index, Object x) {
+        this.getB().setElementAt(x,index);
+    }
+    
+    public void setC(int index, Object x) {
+        this.c.setElementAt(x,index);
+    }
+    
+    public void setD(int index, Object x) {
+        this.d.setElementAt(x,index);
+    }
+    
+    public void setE(int index, Object x) {
+        this.e.setElementAt(x,index);
+    }
+    
+    public void setF(int index, Object x) {
+        this.f.setElementAt(x,index);
+    }
+
+    public double getA(int index) {
+        return (double)Double.valueOf(getA().get(index).toString());
+    }
+    
+    public double getB(int index) {
+        return (double)Double.valueOf(getB().get(index).toString());
+    }
+    
+    public double getC(int index) {
+        return (double)Double.valueOf(c.get(index).toString());
+    }
+    
+    public double getD(int index) {
+        return (double)Double.valueOf(d.get(index).toString());
+    }
+    
+    public double getE(int index) {
+        return (double)Double.valueOf(e.get(index).toString());
+    }
+    
+    public double getF(int index) {
+        return (double)Double.valueOf(getF().get(index).toString());
+    }
+
+    public Vector getA() {
+        return a;
+    }
+
+    public Vector getB() {
+        return b;
+    }
+
+    public Vector getC() {
+        return c;
+    }
+
+    public Vector getD() {
+        return d;
+    }
+
+    public Vector getE() {
+        return e;
+    }
+
+    public Vector getF() {
+        return f;
+    }
+
+    public void setA(Vector f) {
+        this.a = f;
+    }
+    
+    public void setB(Vector f) {
+        this.b = f;
+    }
+    
+    public void setC(Vector f) {
+        this.c = f;
+    }
+    
+    public void setD(Vector f) {
+        this.d = f;
+    }
+    
+    public void setE(Vector f) {
+        this.e = f;
+    }
+    
+    public void setF(Vector f) {
+        this.f = f;
+    }
+    
 }

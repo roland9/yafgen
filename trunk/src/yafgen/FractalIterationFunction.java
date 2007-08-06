@@ -67,7 +67,7 @@ public abstract class FractalIterationFunction extends FractalImage {
         q = new double[6]; p = 0.0D;
         
         for( int i=0; i<4; i++ ) {
-            flaeche = Math.abs(fPars.a[i]*fPars.d[i] - fPars.b[i]*fPars.c[i]);
+            flaeche = Math.abs(fPars.getA(i)*fPars.getD(i) - fPars.getB(i)*fPars.getC(i));
             p += ((flaeche > 0.0D) ? flaeche : 0.01D);
             q[i] = p;
         }
@@ -115,7 +115,7 @@ public abstract class FractalIterationFunction extends FractalImage {
                     rgbCol = bufferedImage.getRGB(xPixel, yPixel);
                     
                     // determine the new color, based on the old one
-                    rgbColNew = calcNewColor(rgbCol);
+                    rgbColNew = calcNewColorPixel(rgbCol);
                     
                     // finally draw the pixel in the new color
                     bufferedImage.setRGB(xPixel, yPixel, rgbColNew);
