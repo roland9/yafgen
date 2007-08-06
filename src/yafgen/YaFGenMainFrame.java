@@ -1,7 +1,7 @@
 /*
  * YAFGMainFrame.java
  *
- * Version 1.0, created on 11. April 2007, 19:34
+ * Version 1.1, created on 11. April 2007, 19:34
  *
  *
  *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
@@ -31,10 +31,14 @@ package yafgen;
 import javax.swing.*;
 import java.awt.geom.*;
 import java.awt.*;
+import javax.imageio.*;
+import java.io.*;
 
 import javax.swing.event.*;
 import java.awt.event.*;
 import javax.swing.table.AbstractTableModel;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
 
 /**
  *
@@ -72,7 +76,8 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     /** verifcation the input fields: integer */
     private InputVerifier myIntegerVerifier;
     
-    
+    /** the selected color set to be used when drawing a fractal */
+    private int selectedColorSet = 1;
     
     /** Creates new form YAFGMainFrame */
     public YaFGenMainFrame() {
@@ -109,7 +114,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalBJFix.setInputVerifier( myDoubleVerifier );
         fractalCJFix.setInputVerifier( myDoubleVerifier );
         
-        
         fractalTypeMandelbrot.setSelected(true);
         
         JTable tableIFS = new JTable( new MyTableModel() );
@@ -123,10 +127,15 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalFrame = new JFrame("YaFGen - Yet Another Fractal Generator, Version 1.0, April 2007");
         fractalFrame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         
-//        create Mac about box        
+//        create Mac about box
 //        if (System.getProperty("mrj.version") != null) {
 //            new MacOSAboutHandler();
 //        }
+        
+//  todo        apple.laf.useScreenMenuBar = true;
+        
+        jMenuItemMandelbrotJulia.setSelected(true);
+        jMenuColorSet1.setSelected(true);
         
         fractalImage = new FractalMandelbrot(this, fPars);
         
@@ -257,6 +266,10 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalYMax.moveCaretPosition(0);
         
         pointMouseDraggedStart = null;
+        
+        // new in Version 1.1: repaint automatically after zooming
+        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint") );
+        
     }
     
     public void mouseMoved(MouseEvent e) {
@@ -285,6 +298,13 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
         buttonGroupFractalType = new javax.swing.ButtonGroup();
+        buttonGroupViewMenu = new javax.swing.ButtonGroup();
+        jAboutDialog = new javax.swing.JDialog();
+        jAboutDialog.setSize(new Dimension(500,350));
+        jLabel31 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextPane1 = new javax.swing.JTextPane();
+        buttonGroupColorSet = new javax.swing.ButtonGroup();
         sizeLabel = new javax.swing.JLabel();
         fractalSizeXLabel = new javax.swing.JLabel();
         fractalSizeX = new javax.swing.JTextField();
@@ -360,6 +380,62 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jLabel4 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         setSizeManually = new javax.swing.JButton();
+        jMenuBar = new javax.swing.JMenuBar();
+        jMenuFile = new javax.swing.JMenu();
+        jMenuItemLoadParameters = new javax.swing.JMenuItem();
+        jMenuItemParametersAs = new javax.swing.JMenuItem();
+        jMenuItemSaveImageAs = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JSeparator();
+        jMenuItemQuit = new javax.swing.JMenuItem();
+        jMenuView = new javax.swing.JMenu();
+        jMenuItemSetSize86 = new javax.swing.JMenuItem();
+        jMenuItemSetSize17 = new javax.swing.JMenuItem();
+        jMenuFractalType = new javax.swing.JMenu();
+        jMenuItemMandelbrotJulia = new javax.swing.JRadioButtonMenuItem();
+        jSeparator2 = new javax.swing.JSeparator();
+        jMenuItemIFS = new javax.swing.JRadioButtonMenuItem();
+        jMenuItemNLF = new javax.swing.JRadioButtonMenuItem();
+        jMenuItemJumper = new javax.swing.JRadioButtonMenuItem();
+        jMenuOptions = new javax.swing.JMenu();
+        jMenuColorSet1 = new javax.swing.JRadioButtonMenuItem();
+        jMenuColorSet2 = new javax.swing.JRadioButtonMenuItem();
+        jMenuColorSet3 = new javax.swing.JRadioButtonMenuItem();
+        jMenuColorSet4 = new javax.swing.JRadioButtonMenuItem();
+        jMenuHelp = new javax.swing.JMenu();
+        jMenuItemAbout = new javax.swing.JMenuItem();
+
+        jAboutDialog.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        jAboutDialog.setAlwaysOnTop(true);
+        jAboutDialog.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jAboutDialog.setResizable(false);
+        jLabel31.setFont(new java.awt.Font("Lucida Grande", 1, 18));
+        jLabel31.setText("YaFGen, Version 1.1");
+
+        jTextPane1.setEditable(false);
+        jTextPane1.setFont(new java.awt.Font("Lucida Grande", 0, 10));
+        jTextPane1.setText("YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas\nCopyright (C) 2007  Roland Gr\u00f6pmair\n\nYaFGen is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or\n(at your option) any later version.\n\nYaFGen is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with YaFGen; if not, write to the Free Software\nFoundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n\nTo contact the author, please send an email to the following address: rgropmair@gmail.com");
+        jTextPane1.setDragEnabled(false);
+        jScrollPane3.setViewportView(jTextPane1);
+
+        org.jdesktop.layout.GroupLayout jAboutDialogLayout = new org.jdesktop.layout.GroupLayout(jAboutDialog.getContentPane());
+        jAboutDialog.getContentPane().setLayout(jAboutDialogLayout);
+        jAboutDialogLayout.setHorizontalGroup(
+            jAboutDialogLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jAboutDialogLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(jAboutDialogLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jLabel31, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 333, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 360, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jAboutDialogLayout.setVerticalGroup(
+            jAboutDialogLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jAboutDialogLayout.createSequentialGroup()
+                .add(jLabel31, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 48, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Input Parameters");
@@ -890,6 +966,164 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             }
         });
 
+        jMenuFile.setText("File");
+        jMenuItemLoadParameters.setText("Load Parameters ...");
+        jMenuFile.add(jMenuItemLoadParameters);
+
+        jMenuItemParametersAs.setText("Save Parameters As...");
+        jMenuItemParametersAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemParametersAsActionPerformed(evt);
+            }
+        });
+
+        jMenuFile.add(jMenuItemParametersAs);
+
+        jMenuItemSaveImageAs.setText("Save Image As...");
+        jMenuItemSaveImageAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSaveImageAsActionPerformed(evt);
+            }
+        });
+
+        jMenuFile.add(jMenuItemSaveImageAs);
+
+        jMenuFile.add(jSeparator1);
+
+        jMenuItemQuit.setText("Quit YaFGen");
+        jMenuItemQuit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemQuitActionPerformed(evt);
+            }
+        });
+
+        jMenuFile.add(jMenuItemQuit);
+
+        jMenuBar.add(jMenuFile);
+
+        jMenuView.setText("View");
+        jMenuItemSetSize86.setText("Set Size to 800x600");
+        jMenuItemSetSize86.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSetSize86ActionPerformed(evt);
+            }
+        });
+
+        jMenuView.add(jMenuItemSetSize86);
+
+        jMenuItemSetSize17.setText("Set Size to 1024x768");
+        jMenuItemSetSize17.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSetSize17ActionPerformed(evt);
+            }
+        });
+
+        jMenuView.add(jMenuItemSetSize17);
+
+        jMenuBar.add(jMenuView);
+
+        jMenuFractalType.setText("Fractal Type");
+        buttonGroupViewMenu.add(jMenuItemMandelbrotJulia);
+        jMenuItemMandelbrotJulia.setText("Mandelbrot / Julia");
+        jMenuItemMandelbrotJulia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemMandelbrotJuliaActionPerformed(evt);
+            }
+        });
+
+        jMenuFractalType.add(jMenuItemMandelbrotJulia);
+
+        jMenuFractalType.add(jSeparator2);
+
+        buttonGroupViewMenu.add(jMenuItemIFS);
+        jMenuItemIFS.setText("Iterated Function System");
+        jMenuItemIFS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemIFSActionPerformed(evt);
+            }
+        });
+
+        jMenuFractalType.add(jMenuItemIFS);
+
+        buttonGroupViewMenu.add(jMenuItemNLF);
+        jMenuItemNLF.setText("Non-Linear Function");
+        jMenuItemNLF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemNLFActionPerformed(evt);
+            }
+        });
+
+        jMenuFractalType.add(jMenuItemNLF);
+
+        buttonGroupViewMenu.add(jMenuItemJumper);
+        jMenuItemJumper.setText("Jumper");
+        jMenuItemJumper.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemJumperActionPerformed(evt);
+            }
+        });
+
+        jMenuFractalType.add(jMenuItemJumper);
+
+        jMenuBar.add(jMenuFractalType);
+
+        jMenuOptions.setText("Options");
+        buttonGroupColorSet.add(jMenuColorSet1);
+        jMenuColorSet1.setText("Use Color Set 1");
+        jMenuColorSet1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuColorSet1ActionPerformed(evt);
+            }
+        });
+
+        jMenuOptions.add(jMenuColorSet1);
+
+        buttonGroupColorSet.add(jMenuColorSet2);
+        jMenuColorSet2.setText("Use Color Set 2");
+        jMenuColorSet2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuColorSet2ActionPerformed(evt);
+            }
+        });
+
+        jMenuOptions.add(jMenuColorSet2);
+
+        buttonGroupColorSet.add(jMenuColorSet3);
+        jMenuColorSet3.setText("Use Color Set 3");
+        jMenuColorSet3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuColorSet3ActionPerformed(evt);
+            }
+        });
+
+        jMenuOptions.add(jMenuColorSet3);
+
+        buttonGroupColorSet.add(jMenuColorSet4);
+        jMenuColorSet4.setText("Use Color Set 4");
+        jMenuColorSet4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuColorSet4ActionPerformed(evt);
+            }
+        });
+
+        jMenuOptions.add(jMenuColorSet4);
+
+        jMenuBar.add(jMenuOptions);
+
+        jMenuHelp.setText("Help");
+        jMenuItemAbout.setText("About");
+        jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemAboutActionPerformed(evt);
+            }
+        });
+
+        jMenuHelp.add(jMenuItemAbout);
+
+        jMenuBar.add(jMenuHelp);
+
+        setJMenuBar(jMenuBar);
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -973,7 +1207,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                             .add(fractalXMax, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(fractalType, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 337, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 10, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .add(jSeparator6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 10, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .add(1, 1, 1)
                 .add(sizeLabel)
@@ -996,6 +1230,133 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         );
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    
+    private void jMenuItemSetSize17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSetSize17ActionPerformed
+        setSizeButton17ActionPerformed(evt);
+    }//GEN-LAST:event_jMenuItemSetSize17ActionPerformed
+    
+    private void jMenuItemSetSize86ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSetSize86ActionPerformed
+        setSizeButton86ActionPerformed(evt);
+    }//GEN-LAST:event_jMenuItemSetSize86ActionPerformed
+    
+    private void jMenuColorSet4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet4ActionPerformed
+        selectedColorSet = 4;
+    }//GEN-LAST:event_jMenuColorSet4ActionPerformed
+    
+    private void jMenuColorSet3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet3ActionPerformed
+        selectedColorSet = 3;
+    }//GEN-LAST:event_jMenuColorSet3ActionPerformed
+    
+    private void jMenuColorSet2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet2ActionPerformed
+        selectedColorSet = 2;
+    }//GEN-LAST:event_jMenuColorSet2ActionPerformed
+    
+    private void jMenuColorSet1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet1ActionPerformed
+        selectedColorSet = 1;
+    }//GEN-LAST:event_jMenuColorSet1ActionPerformed
+    
+    private void jMenuItemParametersAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemParametersAsActionPerformed
+        
+        String msg = "Save Fractal Parameters as File";
+        FileDialog file = new FileDialog(this, msg, FileDialog.SAVE);
+        file.setFile("*.yafgen");  // set initial filename filter
+        
+        // todo letztes dir merken
+        // todo does not work file.setFilenameFilter(new MyFilenameFilter() );
+        file.setVisible(true); // Blocks
+        
+        String curFile;
+        if ((curFile = file.getFile()) != null) {
+            String filename = file.getDirectory() + curFile;
+            // curFile ends in .*.* if file does not exist
+            byte[] data;
+            // Remove trailing ".*.*" if present - signifies file does not exist
+            if (filename.indexOf(".*.*") != -1) {
+                filename = filename.substring(0, filename.length()-4);
+            }
+            
+            try {
+            /*
+             FileOutputStream fos = new FileOutputStream(filename);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+             
+            oos.writeObject(fPars);
+             
+            oos.close();
+             *             **/
+                XMLEncoder e = new XMLEncoder(
+                        new BufferedOutputStream(
+                        new FileOutputStream(filename)));
+                e.writeObject( fPars );
+                e.close();
+                
+//            } catch ( IOException e) {
+            } catch ( IOException e) {
+                // todo
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_jMenuItemParametersAsActionPerformed
+    
+    private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
+        jAboutDialog.setVisible(true);
+        
+        
+    }//GEN-LAST:event_jMenuItemAboutActionPerformed
+    
+    private void jMenuItemIFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemIFSActionPerformed
+        fractalType.setSelectedComponent(jPanelIterationFunctions);
+        iterationFunctions.setSelectedComponent(jPanelIFS);
+    }//GEN-LAST:event_jMenuItemIFSActionPerformed
+    
+    private void jMenuItemJumperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJumperActionPerformed
+        fractalType.setSelectedComponent(jPanelIterationFunctions);
+        iterationFunctions.setSelectedComponent(jPanelJumper);
+    }//GEN-LAST:event_jMenuItemJumperActionPerformed
+    
+    private void jMenuItemMandelbrotJuliaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMandelbrotJuliaActionPerformed
+        fractalType.setSelectedComponent(jPanelMandelJulia);
+    }//GEN-LAST:event_jMenuItemMandelbrotJuliaActionPerformed
+    
+    private void jMenuItemQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemQuitActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jMenuItemQuitActionPerformed
+    
+    private void jMenuItemNLFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemNLFActionPerformed
+        fractalType.setSelectedComponent(jPanelIterationFunctions);
+        iterationFunctions.setSelectedComponent(jPanelNLF);
+    }//GEN-LAST:event_jMenuItemNLFActionPerformed
+    
+    private void jMenuItemSaveImageAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveImageAsActionPerformed
+        // todo how to make sure the paining is complete?
+        //if fractalImage.finishedDrawing()
+        
+        String msg = "Save Fractal Image as File";
+        FileDialog file = new FileDialog(this, msg, FileDialog.SAVE);
+        file.setFile("*.jpeg");  // set initial filename filter
+        
+        // todo letztes dir merken
+        // todo does not work file.setFilenameFilter(new MyFilenameFilter() );
+        file.setVisible(true); // Blocks
+        
+        String curFile;
+        if ((curFile = file.getFile()) != null) {
+            String filename = file.getDirectory() + curFile;
+            // curFile ends in .*.* if file does not exist
+            byte[] data;
+            // Remove trailing ".*.*" if present - signifies file does not exist
+            if (filename.indexOf(".*.*") != -1) {
+                filename = filename.substring(0, filename.length()-4);
+            }
+            
+            File f = new File(filename);
+            try {
+                f.createNewFile();
+                ImageIO.write(fractalImage.getBufferedImage(), "png", f );
+            } catch( IOException e ) {}
+            
+        }
+    }//GEN-LAST:event_jMenuItemSaveImageAsActionPerformed
     
     private void setSizeManuallyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSizeManuallyActionPerformed
         // set window size to the enteres values
@@ -1045,11 +1406,17 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private void setSizeButton17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSizeButton17ActionPerformed
         // set window size to 1024x768
         setNewSize(1024,768);
+        
+        // new in Version 1.1: repaint automatically after setting new size
+        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint") );
     }//GEN-LAST:event_setSizeButton17ActionPerformed
     
     private void setSizeButton86ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSizeButton86ActionPerformed
         // set window size to 800x600
         setNewSize(800,600);
+        
+        // new in Version 1.1: repaint automatically after setting new size
+        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint") );
     }//GEN-LAST:event_setSizeButton86ActionPerformed
     
     /** the user pressed the repaint button, or he hit the enter key (default action)
@@ -1222,7 +1589,9 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroupColorSet;
     private javax.swing.ButtonGroup buttonGroupFractalType;
+    private javax.swing.ButtonGroup buttonGroupViewMenu;
     private javax.swing.JButton buttonStopInfiniteLoop;
     private javax.swing.JCheckBox checkBoxInfiniteLoop;
     private javax.swing.JTextField fractalA;
@@ -1250,6 +1619,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JTextField fractalYMin;
     private javax.swing.JTextField fractalYStart;
     private javax.swing.JTabbedPane iterationFunctions;
+    private javax.swing.JDialog jAboutDialog;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1274,21 +1644,47 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JMenuBar jMenuBar;
+    private javax.swing.JRadioButtonMenuItem jMenuColorSet1;
+    private javax.swing.JRadioButtonMenuItem jMenuColorSet2;
+    private javax.swing.JRadioButtonMenuItem jMenuColorSet3;
+    private javax.swing.JRadioButtonMenuItem jMenuColorSet4;
+    private javax.swing.JMenu jMenuFile;
+    private javax.swing.JMenu jMenuFractalType;
+    private javax.swing.JMenu jMenuHelp;
+    private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JRadioButtonMenuItem jMenuItemIFS;
+    private javax.swing.JRadioButtonMenuItem jMenuItemJumper;
+    private javax.swing.JMenuItem jMenuItemLoadParameters;
+    private javax.swing.JRadioButtonMenuItem jMenuItemMandelbrotJulia;
+    private javax.swing.JRadioButtonMenuItem jMenuItemNLF;
+    private javax.swing.JMenuItem jMenuItemParametersAs;
+    private javax.swing.JMenuItem jMenuItemQuit;
+    private javax.swing.JMenuItem jMenuItemSaveImageAs;
+    private javax.swing.JMenuItem jMenuItemSetSize17;
+    private javax.swing.JMenuItem jMenuItemSetSize86;
+    private javax.swing.JMenu jMenuOptions;
+    private javax.swing.JMenu jMenuView;
     private javax.swing.JPanel jPanelIFS;
     private javax.swing.JPanel jPanelIterationFunctions;
     private javax.swing.JPanel jPanelJumper;
     private javax.swing.JPanel jPanelMandelJulia;
     private javax.swing.JPanel jPanelNLF;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator5;
     private javax.swing.JSeparator jSeparator6;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTextPane jTextPane1;
     private javax.swing.JComboBox jumperPresets;
     private javax.swing.JButton repaintButton;
     private javax.swing.JButton setDefaultValuesIFS;
@@ -1318,22 +1714,22 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         public Object getValueAt(int row, int col) {
             switch (col) {
                 case 0:
-                    return new Double(fPars.a[row]);
+                    return new Double(fPars.getA(row));
                     
                 case 1:
-                    return new Double(fPars.b[row]);
+                    return new Double(fPars.getB(row));
                     
                 case 2:
-                    return new Double(fPars.c[row]);
+                    return new Double(fPars.getC(row));
                     
                 case 3:
-                    return new Double(fPars.d[row]);
+                    return new Double(fPars.getD(row));
                     
                 case 4:
-                    return new Double(fPars.e[row]);
+                    return new Double(fPars.getE(row));
                     
                 case 5:
-                    return new Double(fPars.f[row]);
+                    return new Double(fPars.getF(row));
             }
             return (String)"Dummy";
         }
@@ -1351,27 +1747,27 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             
             switch (col) {
                 case 0:
-                    fPars.a[row] = val;
+                    fPars.setA(row,val);
                     break;
                     
                 case 1:
-                    fPars.b[row] = val;
+                    fPars.setB(row,val);
                     break;
                     
                 case 2:
-                    fPars.c[row] = val;
+                    fPars.setC(row,val);
                     break;
                     
                 case 3:
-                    fPars.d[row] = val;
+                    fPars.setD(row,val);
                     break;
                     
                 case 4:
-                    fPars.e[row] = val;
+                    fPars.setE(row,val);
                     break;
                     
                 case 5:
-                    fPars.f[row] = val;
+                    fPars.setF(row,val);
                     break;
             }
             fireTableCellUpdated(row, col);
@@ -1480,5 +1876,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         
     }
     
-    
+    public int getSelectedColorSet() {
+        return selectedColorSet;
+    }
 }

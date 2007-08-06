@@ -1,11 +1,11 @@
 /*
  * FractalImage.java
  *
- * Version 1.0, created on 11. April 2007, 19:34
+ * Version 1.1, created on 11. April 2007, 19:34
  *
  *
- *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas 
- *   Copyright (C) 2007  Roland Gršpmair
+ *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
+ *   Copyright (C) 2007  Roland Grï¿½pmair
  *
  *   This file is part of YaFGen.
  *
@@ -56,8 +56,8 @@ public abstract class FractalImage extends JPanel {
     protected boolean repaintFlag = true;
     protected SwingWorker worker;
     
-    /** 
-     * Creates a new instance of FractalImage 
+    /**
+     * Creates a new instance of FractalImage
      */
     public FractalImage(YaFGenMainFrame myFrame, FractalParameters myFPars) {
         mainFrame = myFrame;
@@ -160,12 +160,64 @@ public abstract class FractalImage extends JPanel {
         return(new Dimension(fPars.sizeX, fPars.sizeY));
     }
     
+    public BufferedImage getBufferedImage() {
+        return bufferedImage;
+    }
+    
     boolean finishedDrawing() {
         return finishedDrawing;
     }
     
-    int calcNewColor( int oldCol ) {
+    protected Color calcNewColorIterations(final int iterations) {
+        Color c;
         
+        // find out color value by some weird algo
+        switch( mainFrame.getSelectedColorSet() ) {
+            case 1:
+                if( iterations != fPars.maxIterations ) {
+                    float floatIterations = (float)iterations/(float)fPars.maxIterations;
+                    c = Color.getHSBColor( floatIterations, 1.0F, 1.0F );
+                } else
+                    c = Color.BLACK;
+                break;
+                
+            case 2:
+                if( iterations != fPars.maxIterations ) {
+                    float floatIterations = (float)iterations/(float)fPars.maxIterations + 0.8F;
+                    c = Color.getHSBColor( floatIterations, 1.0F, 1.0F );
+                } else
+                    c = Color.BLACK;
+                break;
+                
+            case 3:
+                if( iterations != fPars.maxIterations ) {
+                    float floatIterations = (float)iterations/(float)fPars.maxIterations *5.2F;
+                    c = Color.getHSBColor( floatIterations, 0.4F, 1.0F );
+                } else
+                    c = Color.BLACK;
+                break;
+                
+            case 4:
+                if( iterations != fPars.maxIterations ) {
+                    float floatIterations = (float)iterations/(float)fPars.maxIterations *10.0F;
+                    c = Color.getHSBColor( floatIterations, 0.8F, 1.0F );
+                } else
+                    c = Color.BLACK;
+                break;
+                
+            default:
+                if( iterations != fPars.maxIterations ) {
+                    float floatIterations = (float)iterations/(float)fPars.maxIterations;
+                    c = Color.getHSBColor( floatIterations, 1.0F, 1.0F );
+                } else
+                    c = Color.BLACK;
+                break;
+        }
+        
+        return c;
+    }
+    
+    protected int calcNewColorPixel( final int oldCol ) {
         int redCol, greenCol, blueCol;
         
         // find out the red/green/blue components
@@ -176,9 +228,38 @@ public abstract class FractalImage extends JPanel {
         // now manipulate the rgb components/colors for the new pixel
         //redCol = (redCol+10)%256;
         //greenCol = (greenCol+20)%256;
-        redCol = (redCol+1)%256;
-        greenCol = (greenCol+15)%256;
-        blueCol = (blueCol+30)%256;
+        
+        switch( mainFrame.getSelectedColorSet() ) {
+            case 1:
+                redCol = (redCol+1)%256;
+                greenCol = (greenCol+15)%256;
+                blueCol = (blueCol+30)%256;
+                break;
+                
+            case 2:
+                redCol = (redCol+20)%256;
+                greenCol = (greenCol+15)%256;
+                blueCol = (blueCol+10)%256;
+                break;
+                
+            case 3:
+                redCol = (redCol+20)%256;
+                greenCol = (greenCol+1)%256;
+                blueCol = (blueCol+30)%256;
+                break;
+                
+            case 4:
+                redCol = (redCol+1)%256;
+                greenCol = (greenCol+1)%256;
+                blueCol = (blueCol+15)%256;
+                break;
+                
+            default:
+                redCol = (redCol+1)%256;
+                greenCol = (greenCol+15)%256;
+                blueCol = (blueCol+30)%256;
+                
+        }
         
         return( new Color(redCol, greenCol, blueCol).getRGB() );
         
