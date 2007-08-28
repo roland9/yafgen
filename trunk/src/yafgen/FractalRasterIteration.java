@@ -1,10 +1,10 @@
 /*
  * FractalRasterIteration.java
  *
- * Version 1.0, created on 11. April 2007, 19:34
+ * Version 1.1, updated 6. August 2007
  *
  *
- *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas 
+ *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
  *   Copyright (C) 2007  Roland Gršpmair
  *
  *   This file is part of YaFGen.
@@ -24,6 +24,13 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *   To contact the author, please send an email to the following address: rgropmair "at" gmail.com
+ *
+ *   Version history:
+ *      1.0, created on 11. April 2007, 19:34
+ *           - first release
+ *
+ *      1.1, updated 6. August 2007
+ *           - Various enhancements, see README
  *
  */
 
@@ -51,15 +58,18 @@ public abstract class FractalRasterIteration extends FractalImage {
     
     private double xStep, yStep;
     private int loopX, loopY;
+    private YaFGenMainFrame myFrame;
     
     /** Creates a new instance of FractalRasterIteration */
     public FractalRasterIteration(YaFGenMainFrame myFrame, FractalParameters myFPars) {
         super(myFrame, myFPars);
+        this.myFrame = myFrame;
     }
-        
+    
     public Object doWork() {
         
         System.out.println( this.getClass() + ": doWork() started");
+        myFrame.setCalculatingLabel( true );
         
         Color c = Color.black;
         finishedDrawing = false;
@@ -105,6 +115,7 @@ public abstract class FractalRasterIteration extends FractalImage {
                     // check if this thread was interrupted
                     if (Thread.interrupted()) {
                         System.out.println( this.getClass() + ": thread was interrupted");
+                        myFrame.setCalculatingLabel( false );
                         throw new InterruptedException();
                     }
                     
@@ -120,11 +131,13 @@ public abstract class FractalRasterIteration extends FractalImage {
         
         // we are done with the entire image, so set the flag
         finishedDrawing = true;
+        myFrame.setCalculatingLabel( false );
+                    
         // return the drawn image object
         return bufferedImage;
         
     }
-
+    
     
     
     // this is the abstract method that does the iteration

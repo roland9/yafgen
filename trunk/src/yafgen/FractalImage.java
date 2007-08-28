@@ -1,11 +1,11 @@
 /*
  * FractalImage.java
  *
- * Version 1.1, created on 11. April 2007, 19:34
+ * Version 1.1, updated 6. August 2007
  *
  *
  *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
- *   Copyright (C) 2007  Roland Grï¿½pmair
+ *   Copyright (C) 2007  Roland Gršpmair
  *
  *   This file is part of YaFGen.
  *
@@ -24,6 +24,13 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *   To contact the author, please send an email to the following address: rgropmair "at" gmail.com
+ *
+ *   Version history:
+ *      1.0, created on 11. April 2007, 19:34
+ *           - first release
+ *
+ *      1.1, updated 6. August 2007
+ *           - Various enhancements, see README
  *
  */
 
