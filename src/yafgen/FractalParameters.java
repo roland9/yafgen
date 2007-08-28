@@ -1,7 +1,7 @@
 /*
  * FractalParameters.java
  *
- * Version 1.0, created on 11. April 2007, 19:34
+ * Version 1.1, updated 6. August 2007
  *
  *
  *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
@@ -24,6 +24,13 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *   To contact the author, please send an email to the following address: rgropmair "at" gmail.com
+ *
+ *   Version history:
+ *      1.0, created on 11. April 2007, 19:34
+ *           - first release
+ *
+ *      1.1, updated 6. August 2007
+ *           - Various enhancements, see README
  *
  */
 
@@ -68,33 +75,47 @@ public class FractalParameters implements java.io.Serializable {
     public boolean infiniteLoopInterrupted;
     
     // IFS
-    private Vector a = new Vector();
-    private Vector b = new Vector();
-    private Vector c = new Vector();
-    private Vector d = new Vector();
-    private Vector e = new Vector();
-    private Vector f = new Vector();
+    public Vector<Double> a;
+    public Vector<Double> b;
+    public Vector<Double> c;
+    public Vector<Double> d;
+    public Vector<Double> e;
+    public Vector<Double> f;
     
-/*    public double[] a;
-    public double[] b;
-    public double[] c;
-    public double[] d;
-    public double[] e;
-    public double[] f;
- */
+    /* enum does not work with XMLEncoder...
+     public enum FractalTypes {
+        MANDEL,
+        JULIA,
+        IFS,
+        NLF,
+        JUMPER
+    };
+    private FractalTypes currentFractalType;
+     
+     */
+    
+    /** 
+        MANDEL  = 1
+        JULIA   = 2
+        IFS     = 3
+        NLF     = 4
+        JUMPER  = 5
+     */
+    public int currentFractalType;
+    
+    
     /** Creates a new instance of FractalParameters */
     public FractalParameters() {
-        setDefaultParameters(null);
+        //setDefaultParameters(null);
     }
     
     public void setDefaultParameters(FractalImage myFImage) {
-        getA().setSize(6);
-        getB().setSize(6);
-        c.setSize(6);
-        d.setSize(6);
-        e.setSize(6);
-        // todo nštig?
-        getF().setSize(6);
+        a = new Vector<Double>(6);
+        b = new Vector<Double>(6);
+        c = new Vector<Double>(6);
+        d = new Vector<Double>(6);
+        e = new Vector<Double>(6);
+        f = new Vector<Double>(6);
         
         // set the default parameters, no matter what FractalImage type
         setSizeX(800);
@@ -123,24 +144,22 @@ public class FractalParameters implements java.io.Serializable {
         setBJFix(0.21);
         setCJFix(100);
         
-        /*
-        setA(new double[6]);
-        setB(new double[6]);
-        setC(new double[6]);
-        setD(new double[6]);
-        setE(new double[6]);
-        setF(new double[6]);
-         */
-        
-        setA(0,0.0);  setB(0, 0.0);  setC(0,-0.0);  setD(0,0.16); setE(0,0.0);  setF(0,0.0);
-        setA(1,0.2);   setB(1,-0.26); setC(1,0.23);  setD(1,0.22); setE(1,0.0);  setF(1,1.6);
-        setA(2,-0.15); setB(2,0.28);  setC(2,0.26);  setD(2,0.24); setE(2,0.0);  setF(2,0.44);
-        setA(3,0.85);  setB(3,0.04);  setC(3,-0.04); setD(3,0.85); setE(3,0.0);  setF(3,1.6);
-        setA(4,0.8);   setB(4,0.1);   setC(4,-0.1);  setD(4,0.6);  setE(4,0.1);  setF(4,0.1);
-        setA(5,0.8);   setB(5,0.1);   setC(5,-0.1);  setD(5,0.6);  setE(5,0.1);  setF(5,0.1);
+        a.add(0,0.0D);   b.add(0, 0.0D);  c.add(0,-0.0D);  d.add(0,0.16D); e.add(0,0.0D);  f.add(0,0.0D);
+        a.add(1,0.2);   b.add(1,-0.26); c.add(1,0.23);  d.add(1,0.22); e.add(1,0.0);  f.add(1,1.6);
+        a.add(2,-0.15); b.add(2,0.28);  c.add(2,0.26);  d.add(2,0.24); e.add(2,0.0);  f.add(2,0.44);
+        a.add(3,0.85);  b.add(3,0.04);  c.add(3,-0.04); d.add(3,0.85); e.add(3,0.0);  f.add(3,1.6);
+        a.add(4,0.8);   b.add(4,0.1);   c.add(4,-0.1);  d.add(4,0.6);  e.add(4,0.1);  f.add(4,0.1);
+        a.add(5,0.8);   b.add(5,0.1);   c.add(5,-0.1);  d.add(5,0.6);  e.add(5,0.1);  f.add(5,0.1);
         
         // now overwrite some parameters again, depending on FractalImage type
         if (myFImage instanceof FractalMandelbrot) {
+            setXMin(-2.5);
+            setXMax(1.2);
+            setYMin(-2.0);
+            setYMax(2.0);
+        }
+        
+        if (myFImage instanceof FractalManowar) {
             setXMin(-2.5);
             setXMax(1.2);
             setYMin(-2.0);
@@ -152,6 +171,8 @@ public class FractalParameters implements java.io.Serializable {
             setXMax(9);
             setYMin(-5);
             setYMax(9);
+            // todo
+            currentFractalType = 4;
         }
         
         if (myFImage instanceof FractalIFS) {
@@ -447,100 +468,70 @@ public class FractalParameters implements java.io.Serializable {
         this.infiniteLoopInterrupted = infiniteLoopInterrupted;
     }
     
-    public void setA(int index, Object x) {
-        this.getA().setElementAt(x,index);
-    }
-    
-    public void setB(int index, Object x) {
-        this.getB().setElementAt(x,index);
-    }
-    
-    public void setC(int index, Object x) {
-        this.c.setElementAt(x,index);
-    }
-    
-    public void setD(int index, Object x) {
-        this.d.setElementAt(x,index);
-    }
-    
-    public void setE(int index, Object x) {
-        this.e.setElementAt(x,index);
-    }
-    
-    public void setF(int index, Object x) {
-        this.f.setElementAt(x,index);
-    }
-
-    public double getA(int index) {
-        return (double)Double.valueOf(getA().get(index).toString());
-    }
-    
-    public double getB(int index) {
-        return (double)Double.valueOf(getB().get(index).toString());
-    }
-    
-    public double getC(int index) {
-        return (double)Double.valueOf(c.get(index).toString());
-    }
-    
-    public double getD(int index) {
-        return (double)Double.valueOf(d.get(index).toString());
-    }
-    
-    public double getE(int index) {
-        return (double)Double.valueOf(e.get(index).toString());
-    }
-    
-    public double getF(int index) {
-        return (double)Double.valueOf(getF().get(index).toString());
-    }
-
-    public Vector getA() {
+    public Vector<Double> getA() {
         return a;
     }
-
-    public Vector getB() {
+    
+    public void setA(Vector<Double> a) {
+        this.a = a;
+    }
+    
+    public Vector<Double> getB() {
         return b;
     }
-
-    public Vector getC() {
+    
+    public void setB(Vector<Double> b) {
+        this.b = b;
+    }
+    
+    public Vector<Double> getC() {
         return c;
     }
-
-    public Vector getD() {
+    
+    public void setC(Vector<Double> c) {
+        this.c = c;
+    }
+    
+    public Vector<Double> getD() {
         return d;
     }
-
-    public Vector getE() {
+    
+    public void setD(Vector<Double> d) {
+        this.d = d;
+    }
+    
+    public Vector<Double> getE() {
         return e;
     }
-
-    public Vector getF() {
+    
+    public void setE(Vector<Double> e) {
+        this.e = e;
+    }
+    
+    public Vector<Double> getF() {
         return f;
     }
-
-    public void setA(Vector f) {
-        this.a = f;
-    }
     
-    public void setB(Vector f) {
-        this.b = f;
-    }
-    
-    public void setC(Vector f) {
-        this.c = f;
-    }
-    
-    public void setD(Vector f) {
-        this.d = f;
-    }
-    
-    public void setE(Vector f) {
-        this.e = f;
-    }
-    
-    public void setF(Vector f) {
+    public void setF(Vector<Double> f) {
         this.f = f;
+    }
+    
+    /*
+    public FractalTypes getCurrentFractalType() {
+        return currentFractalType;
+    }
+    
+    public void setCurrentFractalType(FractalTypes currentFractalType) {
+        this.currentFractalType = currentFractalType;
+    }
+     */
+    
+    public int getCurrentFractalType() {
+        return currentFractalType;
+    }
+    
+    public void setCurrentFractalType(int currentFractalType) {
+        this.currentFractalType = currentFractalType;
     }
     
 }

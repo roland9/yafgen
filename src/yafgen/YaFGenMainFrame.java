@@ -1,7 +1,7 @@
 /*
  * YAFGMainFrame.java
  *
- * Version 1.1, created on 11. April 2007, 19:34
+ * Version 1.1, updated 6. August 2007
  *
  *
  *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
@@ -24,6 +24,13 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *   To contact the author, please send an email to the following address: rgropmair "at" gmail.com
+ *
+ *   Version history:
+ *      1.0, created on 11. April 2007, 19:34
+ *           - first release
+ *
+ *      1.1, updated 6. August 2007
+ *           - Various enhancements, see README
  *
  */
 
@@ -79,6 +86,9 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     /** the selected color set to be used when drawing a fractal */
     private int selectedColorSet = 1;
     
+    /** todo */
+    JTable tableIFS;
+    
     /** Creates new form YAFGMainFrame */
     public YaFGenMainFrame() {
         initComponents();
@@ -116,7 +126,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         
         fractalTypeMandelbrot.setSelected(true);
         
-        JTable tableIFS = new JTable( new MyTableModel() );
+        tableIFS = new JTable( new MyTableModel() );
         jScrollPane1.setViewportView(tableIFS);
         jumperPresets.setModel( new MyComboBoxModel() );
         
@@ -124,7 +134,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         
         fPars = new FractalParameters();
         
-        fractalFrame = new JFrame("YaFGen - Yet Another Fractal Generator, Version 1.0, April 2007");
+        fractalFrame = new JFrame("YaFGen - Yet Another Fractal Generator, Version 1.1, August 2007");
         fractalFrame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         
 //        create Mac about box
@@ -134,10 +144,14 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         
 //  todo        apple.laf.useScreenMenuBar = true;
         
-        jMenuItemMandelbrotJulia.setSelected(true);
+        jMenuItemMandelbrot.setSelected(true);
         jMenuColorSet1.setSelected(true);
         
+        // todo
+        fPars.setDefaultParameters( null );
         fractalImage = new FractalMandelbrot(this, fPars);
+        fPars.setDefaultParameters( fractalImage );
+        fPars.setCurrentFractalType( 1 );
         
         // Java 1.5: fractalFrame.add(fractalImage);
         fractalFrame.getContentPane().add(fractalImage);
@@ -330,6 +344,8 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jLabel10 = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
+        fractalTypeManowar = new javax.swing.JRadioButton();
+        jLabel32 = new javax.swing.JLabel();
         jPanelIterationFunctions = new javax.swing.JPanel();
         iterationFunctions = new javax.swing.JTabbedPane();
         jPanelIFS = new javax.swing.JPanel();
@@ -380,10 +396,11 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jLabel4 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         setSizeManually = new javax.swing.JButton();
+        jLabelCalculating = new javax.swing.JLabel();
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemLoadParameters = new javax.swing.JMenuItem();
-        jMenuItemParametersAs = new javax.swing.JMenuItem();
+        jMenuItemSaveParametersAs = new javax.swing.JMenuItem();
         jMenuItemSaveImageAs = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         jMenuItemQuit = new javax.swing.JMenuItem();
@@ -391,7 +408,9 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jMenuItemSetSize86 = new javax.swing.JMenuItem();
         jMenuItemSetSize17 = new javax.swing.JMenuItem();
         jMenuFractalType = new javax.swing.JMenu();
-        jMenuItemMandelbrotJulia = new javax.swing.JRadioButtonMenuItem();
+        jMenuItemMandelbrot = new javax.swing.JRadioButtonMenuItem();
+        jMenuItemJulia = new javax.swing.JRadioButtonMenuItem();
+        jMenuItemManowar = new javax.swing.JRadioButtonMenuItem();
         jSeparator2 = new javax.swing.JSeparator();
         jMenuItemIFS = new javax.swing.JRadioButtonMenuItem();
         jMenuItemNLF = new javax.swing.JRadioButtonMenuItem();
@@ -532,6 +551,14 @@ public class YaFGenMainFrame extends javax.swing.JFrame
 
         jLabel26.setText("fix for Julia:");
 
+        buttonGroupFractalType.add(fractalTypeManowar);
+        fractalTypeManowar.setText("Manowar");
+        fractalTypeManowar.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        fractalTypeManowar.setMargin(new java.awt.Insets(0, 0, 0, 0));
+
+        jLabel32.setFont(new java.awt.Font("Lucida Grande", 0, 10));
+        jLabel32.setText("z[n+1] := z[n]\u00b2 + c; z[0] := fix");
+
         org.jdesktop.layout.GroupLayout jPanelMandelJuliaLayout = new org.jdesktop.layout.GroupLayout(jPanelMandelJulia);
         jPanelMandelJulia.setLayout(jPanelMandelJuliaLayout);
         jPanelMandelJuliaLayout.setHorizontalGroup(
@@ -541,39 +568,46 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                         .add(jPanelMandelJuliaLayout.createSequentialGroup()
-                            .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(fractalTypeJulia)
-                                .add(fractalTypeMandelbrot))
-                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 20, Short.MAX_VALUE)
-                            .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(jLabel10)
-                                .add(jLabel21))
-                            .add(55, 55, 55))
-                        .add(jPanelMandelJuliaLayout.createSequentialGroup()
-                            .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                .add(jPanelMandelJuliaLayout.createSequentialGroup()
-                                    .add(66, 66, 66)
-                                    .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                        .add(org.jdesktop.layout.GroupLayout.TRAILING, fractalMaxIter, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .add(org.jdesktop.layout.GroupLayout.TRAILING, fractalMaxLen, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                                .add(jLabel8)
-                                .add(jLabel9))
-                            .addContainerGap(156, Short.MAX_VALUE))
-                        .add(jPanelMandelJuliaLayout.createSequentialGroup()
-                            .add(jLabel6)
-                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                            .add(fractalXFix, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 22, Short.MAX_VALUE)
-                            .add(jLabel7)
-                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                            .add(fractalYFix, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(41, 41, 41))
-                        .add(jPanelMandelJuliaLayout.createSequentialGroup()
-                            .add(jLabel26)
-                            .addContainerGap(238, Short.MAX_VALUE)))
+                            .add(fractalTypeManowar)
+                            .add(263, 263, 263))
+                        .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(jPanelMandelJuliaLayout.createSequentialGroup()
+                                .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(fractalTypeJulia)
+                                    .add(fractalTypeMandelbrot))
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 49, Short.MAX_VALUE)
+                                .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jLabel10)
+                                    .add(jLabel21)
+                                    .add(jLabel32))
+                                .add(55, 55, 55))
+                            .add(jPanelMandelJuliaLayout.createSequentialGroup()
+                                .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jPanelMandelJuliaLayout.createSequentialGroup()
+                                        .add(66, 66, 66)
+                                        .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                            .add(org.jdesktop.layout.GroupLayout.TRAILING, fractalMaxIter, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                            .add(org.jdesktop.layout.GroupLayout.TRAILING, fractalMaxLen, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                                    .add(jLabel8)
+                                    .add(jLabel9))
+                                .addContainerGap(156, Short.MAX_VALUE))
+                            .add(jPanelMandelJuliaLayout.createSequentialGroup()
+                                .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jPanelMandelJuliaLayout.createSequentialGroup()
+                                        .add(jLabel6)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(fractalXFix, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 51, Short.MAX_VALUE)
+                                        .add(jLabel7)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(fractalYFix, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                                    .add(jPanelMandelJuliaLayout.createSequentialGroup()
+                                        .add(jLabel26)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 226, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                                .add(41, 41, 41))))
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanelMandelJuliaLayout.createSequentialGroup()
                         .add(setDefaultValuesMandelbrot)
-                        .addContainerGap())))
+                        .add(51, 51, 51))))
         );
         jPanelMandelJuliaLayout.setVerticalGroup(
             jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -586,7 +620,11 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(fractalTypeJulia)
                     .add(jLabel21, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 21, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(18, 18, 18)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(fractalTypeManowar)
+                    .add(jLabel32, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 21, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 25, Short.MAX_VALUE)
                 .add(jLabel26)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
@@ -594,7 +632,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                     .add(fractalXFix, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jLabel7)
                     .add(fractalYFix, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 44, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jLabel8)
                     .add(fractalMaxIter, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
@@ -966,19 +1004,30 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             }
         });
 
-        jMenuFile.setText("File");
-        jMenuItemLoadParameters.setText("Load Parameters ...");
-        jMenuFile.add(jMenuItemLoadParameters);
+        jLabelCalculating.setText("Calculating and drawing ...");
 
-        jMenuItemParametersAs.setText("Save Parameters As...");
-        jMenuItemParametersAs.addActionListener(new java.awt.event.ActionListener() {
+        jMenuFile.setText("File");
+        jMenuItemLoadParameters.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItemLoadParameters.setText("Load Parameters ...");
+        jMenuItemLoadParameters.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemParametersAsActionPerformed(evt);
+                jMenuItemLoadParametersActionPerformed(evt);
             }
         });
 
-        jMenuFile.add(jMenuItemParametersAs);
+        jMenuFile.add(jMenuItemLoadParameters);
 
+        jMenuItemSaveParametersAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItemSaveParametersAs.setText("Save Parameters As...");
+        jMenuItemSaveParametersAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSaveParametersAsActionPerformed(evt);
+            }
+        });
+
+        jMenuFile.add(jMenuItemSaveParametersAs);
+
+        jMenuItemSaveImageAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItemSaveImageAs.setText("Save Image As...");
         jMenuItemSaveImageAs.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -990,6 +1039,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
 
         jMenuFile.add(jSeparator1);
 
+        jMenuItemQuit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItemQuit.setText("Quit YaFGen");
         jMenuItemQuit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1023,18 +1073,42 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jMenuBar.add(jMenuView);
 
         jMenuFractalType.setText("Fractal Type");
-        buttonGroupViewMenu.add(jMenuItemMandelbrotJulia);
-        jMenuItemMandelbrotJulia.setText("Mandelbrot / Julia");
-        jMenuItemMandelbrotJulia.addActionListener(new java.awt.event.ActionListener() {
+        jMenuItemMandelbrot.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_MASK));
+        buttonGroupViewMenu.add(jMenuItemMandelbrot);
+        jMenuItemMandelbrot.setText("Mandelbrot");
+        jMenuItemMandelbrot.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemMandelbrotJuliaActionPerformed(evt);
+                jMenuItemMandelbrotActionPerformed(evt);
             }
         });
 
-        jMenuFractalType.add(jMenuItemMandelbrotJulia);
+        jMenuFractalType.add(jMenuItemMandelbrot);
+
+        jMenuItemJulia.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_MASK));
+        buttonGroupViewMenu.add(jMenuItemJulia);
+        jMenuItemJulia.setText("Julia");
+        jMenuItemJulia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemJuliaActionPerformed(evt);
+            }
+        });
+
+        jMenuFractalType.add(jMenuItemJulia);
+
+        jMenuItemManowar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_MASK));
+        buttonGroupViewMenu.add(jMenuItemManowar);
+        jMenuItemManowar.setText("Manowar");
+        jMenuItemManowar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemManowarActionPerformed(evt);
+            }
+        });
+
+        jMenuFractalType.add(jMenuItemManowar);
 
         jMenuFractalType.add(jSeparator2);
 
+        jMenuItemIFS.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_2, java.awt.event.InputEvent.CTRL_MASK));
         buttonGroupViewMenu.add(jMenuItemIFS);
         jMenuItemIFS.setText("Iterated Function System");
         jMenuItemIFS.addActionListener(new java.awt.event.ActionListener() {
@@ -1045,6 +1119,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
 
         jMenuFractalType.add(jMenuItemIFS);
 
+        jMenuItemNLF.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_3, java.awt.event.InputEvent.CTRL_MASK));
         buttonGroupViewMenu.add(jMenuItemNLF);
         jMenuItemNLF.setText("Non-Linear Function");
         jMenuItemNLF.addActionListener(new java.awt.event.ActionListener() {
@@ -1055,6 +1130,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
 
         jMenuFractalType.add(jMenuItemNLF);
 
+        jMenuItemJumper.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_4, java.awt.event.InputEvent.CTRL_MASK));
         buttonGroupViewMenu.add(jMenuItemJumper);
         jMenuItemJumper.setText("Jumper");
         jMenuItemJumper.addActionListener(new java.awt.event.ActionListener() {
@@ -1111,6 +1187,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jMenuBar.add(jMenuOptions);
 
         jMenuHelp.setText("Help");
+        jMenuItemAbout.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItemAbout.setText("About");
         jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1153,7 +1230,9 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                         .add(50, 50, 50))
                     .add(layout.createSequentialGroup()
                         .add(repaintButton)
-                        .addContainerGap(286, Short.MAX_VALUE))
+                        .add(50, 50, 50)
+                        .add(jLabelCalculating)
+                        .addContainerGap())
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 14, Short.MAX_VALUE)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -1225,11 +1304,110 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jSeparator5, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 10, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(repaintButton)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(repaintButton)
+                    .add(jLabelCalculating))
                 .addContainerGap())
         );
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jMenuItemManowarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemManowarActionPerformed
+// TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItemManowarActionPerformed
+
+    private void jMenuItemJuliaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJuliaActionPerformed
+// TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItemJuliaActionPerformed
+    
+    private void jMenuItemLoadParametersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadParametersActionPerformed
+        String msg = "Load Fractal Parameters from File";
+        FileDialog file = new FileDialog(this, msg, FileDialog.LOAD);
+        file.setFile("*.yafgen");  // set initial filename filter
+        
+        // todo letztes dir merken
+        // todo does not work file.setFilenameFilter(new MyFilenameFilter() );
+        file.setVisible(true); // Blocks
+        
+        String curFile;
+        if ((curFile = file.getFile()) != null) {
+            String filename = file.getDirectory() + curFile;
+            // curFile ends in .*.* if file does not exist
+            byte[] data;
+            // Remove trailing ".*.*" if present - signifies file does not exist
+            if (filename.indexOf(".*.*") != -1) {
+                filename = filename.substring(0, filename.length()-4);
+            }
+            
+            try {
+                
+                XMLDecoder e = new XMLDecoder(
+                        new BufferedInputStream(
+                        new FileInputStream(filename)));
+                fPars = (FractalParameters)e.readObject();
+                e.close();
+                
+            } catch ( IOException e) {
+                // todo
+                e.printStackTrace();
+            }
+        }
+        
+        switch( fPars.currentFractalType ) {
+            case 1:
+                jMenuItemMandelbrot.setSelected(true);
+                fractalType.setSelectedIndex(0);
+                fractalTypeMandelbrot.setSelected(true);
+                refreshInputFields();
+                
+                break;
+                
+            case 2:
+                jMenuItemJulia.setSelected(true);
+                fractalType.setSelectedIndex(0);
+                fractalTypeJulia.setSelected(true);
+                refreshInputFields();
+                
+                break;
+                
+            case 3:
+                jMenuItemIFS.setSelected(true);
+                fractalType.setSelectedIndex(1);
+                iterationFunctions.setSelectedIndex(0);
+                refreshInputFields();
+                
+                break;
+                
+            case 4:
+                jMenuItemNLF.setSelected(true);
+                fractalType.setSelectedIndex(1);
+                iterationFunctions.setSelectedIndex(1);
+                refreshInputFields();
+                
+                break;
+                
+            case 5:
+                jMenuItemJumper.setSelected(true);
+                fractalType.setSelectedIndex(1);
+                iterationFunctions.setSelectedIndex(2);
+                refreshInputFields();
+                
+                break;
+                
+            case 6:
+                jMenuItemManowar.setSelected(true);
+                fractalType.setSelectedIndex(0);
+                fractalTypeManowar.setSelected(true);
+                refreshInputFields();
+                
+                break;
+                
+        }
+        
+        // todo  jMenuColorSet1.setSelected(true);
+        // todo resize manually?
+        
+    }//GEN-LAST:event_jMenuItemLoadParametersActionPerformed
     
     private void jMenuItemSetSize17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSetSize17ActionPerformed
         setSizeButton17ActionPerformed(evt);
@@ -1255,7 +1433,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         selectedColorSet = 1;
     }//GEN-LAST:event_jMenuColorSet1ActionPerformed
     
-    private void jMenuItemParametersAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemParametersAsActionPerformed
+    private void jMenuItemSaveParametersAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveParametersAsActionPerformed
         
         String msg = "Save Fractal Parameters as File";
         FileDialog file = new FileDialog(this, msg, FileDialog.SAVE);
@@ -1296,7 +1474,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 e.printStackTrace();
             }
         }
-    }//GEN-LAST:event_jMenuItemParametersAsActionPerformed
+    }//GEN-LAST:event_jMenuItemSaveParametersAsActionPerformed
     
     private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
         jAboutDialog.setVisible(true);
@@ -1314,9 +1492,9 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         iterationFunctions.setSelectedComponent(jPanelJumper);
     }//GEN-LAST:event_jMenuItemJumperActionPerformed
     
-    private void jMenuItemMandelbrotJuliaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMandelbrotJuliaActionPerformed
+    private void jMenuItemMandelbrotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMandelbrotActionPerformed
         fractalType.setSelectedComponent(jPanelMandelJulia);
-    }//GEN-LAST:event_jMenuItemMandelbrotJuliaActionPerformed
+    }//GEN-LAST:event_jMenuItemMandelbrotActionPerformed
     
     private void jMenuItemQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemQuitActionPerformed
         System.exit(0);
@@ -1446,14 +1624,24 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             
             fPars.infiniteLoopInterrupted = false;
             
+            
             // find out what fractal type is selected
             switch( fractalType.getSelectedIndex()) {
                 case 0:
-                    // Mandelbrot or Julia
-                    if(fractalTypeMandelbrot.isSelected())
+                    // Mandelbrot or Julia, or Manowar
+                    if(fractalTypeMandelbrot.isSelected()) {
                         fractalImage = new FractalMandelbrot(this, fPars);
-                    else
+                        fPars.setCurrentFractalType( 1 );  // Mandel
+                        jMenuItemMandelbrot.setSelected(true);
+                    } else if(fractalTypeJulia.isSelected()) {
                         fractalImage = new FractalJulia(this, fPars);
+                        fPars.setCurrentFractalType( 2 );  // Julia
+                        jMenuItemJulia.setSelected(true);
+                    } else {
+                        fractalImage = new FractalManowar(this, fPars);
+                        fPars.setCurrentFractalType( 6 );  // Manowar
+                        jMenuItemManowar.setSelected(true);
+                    }
                     break;
                     
                 case 1:
@@ -1462,20 +1650,26 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                         case 0:
                             // IFS
                             fractalImage = new FractalIFS(this, fPars);
+                            fPars.setCurrentFractalType( 3 );
+                            jMenuItemIFS.setSelected(true);
                             break;
                             
                         case 1:
                             // NLF
                             fractalImage = new FractalNLF(this, fPars);
+                            fPars.setCurrentFractalType( 4 );
+                            jMenuItemNLF.setSelected(true);
                             break;
                             
                         case 2:
                             // Jumper
                             fractalImage = new FractalJumper(this, fPars);
+                            fPars.setCurrentFractalType( 5 );
+                            jMenuItemJumper.setSelected(true);
                             break;
-                            
                     }
                     break;
+                    
             }
             
             boolean inputOK = true;
@@ -1575,6 +1769,8 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalCJFix.setText(Double.toString(fPars.cJFix));
         fractalCJFix.moveCaretPosition(0);
         
+        // todo table?!?
+        tableIFS.repaint();
     }
     
     /**
@@ -1610,6 +1806,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JTabbedPane fractalType;
     private javax.swing.JRadioButton fractalTypeJulia;
     private javax.swing.JRadioButton fractalTypeMandelbrot;
+    private javax.swing.JRadioButton fractalTypeManowar;
     private javax.swing.JTextField fractalXFix;
     private javax.swing.JTextField fractalXMax;
     private javax.swing.JTextField fractalXMin;
@@ -1645,12 +1842,14 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabelCalculating;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JRadioButtonMenuItem jMenuColorSet1;
     private javax.swing.JRadioButtonMenuItem jMenuColorSet2;
@@ -1661,13 +1860,15 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JMenu jMenuHelp;
     private javax.swing.JMenuItem jMenuItemAbout;
     private javax.swing.JRadioButtonMenuItem jMenuItemIFS;
+    private javax.swing.JRadioButtonMenuItem jMenuItemJulia;
     private javax.swing.JRadioButtonMenuItem jMenuItemJumper;
     private javax.swing.JMenuItem jMenuItemLoadParameters;
-    private javax.swing.JRadioButtonMenuItem jMenuItemMandelbrotJulia;
+    private javax.swing.JRadioButtonMenuItem jMenuItemMandelbrot;
+    private javax.swing.JRadioButtonMenuItem jMenuItemManowar;
     private javax.swing.JRadioButtonMenuItem jMenuItemNLF;
-    private javax.swing.JMenuItem jMenuItemParametersAs;
     private javax.swing.JMenuItem jMenuItemQuit;
     private javax.swing.JMenuItem jMenuItemSaveImageAs;
+    private javax.swing.JMenuItem jMenuItemSaveParametersAs;
     private javax.swing.JMenuItem jMenuItemSetSize17;
     private javax.swing.JMenuItem jMenuItemSetSize86;
     private javax.swing.JMenu jMenuOptions;
@@ -1714,22 +1915,22 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         public Object getValueAt(int row, int col) {
             switch (col) {
                 case 0:
-                    return new Double(fPars.getA(row));
+                    return new Double(fPars.getA().get(row).toString());
                     
                 case 1:
-                    return new Double(fPars.getB(row));
+                    return new Double(fPars.getB().get(row).toString());
                     
                 case 2:
-                    return new Double(fPars.getC(row));
+                    return new Double(fPars.getC().get(row).toString());
                     
                 case 3:
-                    return new Double(fPars.getD(row));
+                    return new Double(fPars.getD().get(row).toString());
                     
                 case 4:
-                    return new Double(fPars.getE(row));
+                    return new Double(fPars.getE().get(row).toString());
                     
                 case 5:
-                    return new Double(fPars.getF(row));
+                    return new Double(fPars.getF().get(row).toString());
             }
             return (String)"Dummy";
         }
@@ -1747,27 +1948,27 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             
             switch (col) {
                 case 0:
-                    fPars.setA(row,val);
+                    fPars.a.set(row,val);
                     break;
                     
                 case 1:
-                    fPars.setB(row,val);
+                    fPars.b.set(row,val);
                     break;
                     
                 case 2:
-                    fPars.setC(row,val);
+                    fPars.c.set(row,val);
                     break;
                     
                 case 3:
-                    fPars.setD(row,val);
+                    fPars.d.set(row,val);
                     break;
                     
                 case 4:
-                    fPars.setE(row,val);
+                    fPars.e.set(row,val);
                     break;
                     
                 case 5:
-                    fPars.setF(row,val);
+                    fPars.f.set(row,val);
                     break;
             }
             fireTableCellUpdated(row, col);
@@ -1878,5 +2079,9 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     
     public int getSelectedColorSet() {
         return selectedColorSet;
+    }
+    
+    public void setCalculatingLabel( boolean flag ) {
+        jLabelCalculating.setVisible( flag );
     }
 }

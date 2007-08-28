@@ -1,10 +1,10 @@
 /*
  * FractalIteratedFunction.java
  *
- * Version 1.0, created on 11. April 2007, 19:34
+ * Version 1.1, updated 6. August 2007
  *
  *
- *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas 
+ *   YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas
  *   Copyright (C) 2007  Roland Gršpmair
  *
  *   This file is part of YaFGen.
@@ -24,6 +24,13 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *   To contact the author, please send an email to the following address: rgropmair "at" gmail.com
+ *
+ *   Version history:
+ *      1.0, created on 11. April 2007, 19:34
+ *           - first release
+ *
+ *      1.1, updated 6. August 2007
+ *           - Various enhancements, see README
  *
  */
 package yafgen;
@@ -50,15 +57,18 @@ public abstract class FractalIterationFunction extends FractalImage {
     int xPixel = 0, yPixel = 0;
     double p, flaeche, q[];
     double xNew, yNew;
+    private YaFGenMainFrame myFrame;
     
     /** Creates a new instance of FractalIterationFunction */
     public FractalIterationFunction(YaFGenMainFrame myFrame, FractalParameters myFPars) {
         super(myFrame, myFPars);
+        this.myFrame = myFrame;
     }
     
     public Object doWork() {
         
         System.out.println( this.getClass() + "doWork() started");
+        myFrame.setCalculatingLabel( true );
         
         Color c = Color.black;
         finishedDrawing = false;
@@ -67,7 +77,10 @@ public abstract class FractalIterationFunction extends FractalImage {
         q = new double[6]; p = 0.0D;
         
         for( int i=0; i<4; i++ ) {
-            flaeche = Math.abs(fPars.getA(i)*fPars.getD(i) - fPars.getB(i)*fPars.getC(i));
+            flaeche = Math.abs(new Double(fPars.a.get(i).toString()) *
+                    new Double(fPars.d.get(i).toString()) -
+                    new Double(fPars.b.get(i).toString()) *
+                    new Double(fPars.c.get(i).toString()) );
             p += ((flaeche > 0.0D) ? flaeche : 0.01D);
             q[i] = p;
         }
@@ -92,8 +105,9 @@ public abstract class FractalIterationFunction extends FractalImage {
             // as long as we did not reach the number of iterations;
             // or the user did not press 'stop' yet (for infinite loops only)
             while ( (count < fPars.count) || fPars.infiniteLoop ) {
-                if( fPars.infiniteLoopInterrupted )
+                if( fPars.infiniteLoopInterrupted ) {
                     break;
+                }
                 
                 if (xIter*xIter + yIter*yIter > fPars.range) {
                     System.out.println("Overflow!");
@@ -145,6 +159,8 @@ public abstract class FractalIterationFunction extends FractalImage {
         
         // we are done with the entire image, so set the flag
         finishedDrawing = true;
+        myFrame.setCalculatingLabel( false );                                
+        
         // return the drawn image object
         return bufferedImage;
         

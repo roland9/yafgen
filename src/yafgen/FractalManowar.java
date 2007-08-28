@@ -1,5 +1,5 @@
 /*
- * FractalIFS.java
+ * FractalManowar.java
  *
  * Version 1.0, created on 11. April 2007, 19:34
  *
@@ -26,37 +26,35 @@
  *   To contact the author, please send an email to the following address: rgropmair "at" gmail.com
  *
  */
-
 package yafgen;
-import java.awt.*;
 
 /**
- * The class FractalIFS implements an Iterated Function System, based on the defined matrix.
+ * The class FractalManowar implements a fractal called "Manowar".
  * The only implemented method is doIteration().
  */
-public class FractalIFS extends FractalIterationFunction {
+public class FractalManowar extends FractalRasterIteration {
     
-    /** Creates a new instance of FractalIFS */
-    public FractalIFS(YaFGenMainFrame myFrame, FractalParameters myFPars) {
+    /** Creates a new instance of FractalManowar */
+    public FractalManowar(YaFGenMainFrame myFrame, FractalParameters myFPars) {
         super(myFrame, myFPars);
-    }        
-    
-    protected void doIteration() {
-        
-        // pick the function, according to its weight
-        int k = 0;
-        p = (double)Math.random();
-        
-        while( p > q[k])
-            k++;
-        
-        // x[n+1] = MAk * x[n] + Vk;   n>1
-        xNew = new Double(fPars.a.get(k).toString())*xIter + 
-                new Double(fPars.b.get(k).toString())*yIter +
-                new Double(fPars.e.get(k).toString());
-        yNew = new Double(fPars.c.get(k).toString())*xIter + 
-                new Double(fPars.d.get(k).toString())*yIter + 
-                new Double(fPars.f.get(k).toString());
-        
     }
+    
+    protected int doIteration(double x, double y) {
+        
+        double tmpX = x, tmpY = y, tmpX_old = x;
+        int i = 0;
+        
+        // z[n+1] := z[n]? + c; z[0] := fix
+        do {
+            i++;
+            tmpX_old = tmpX;
+            tmpX = tmpX*tmpX/tmpY/10.0 - tmpY*tmpX*tmpX/5.0 + fPars.xFix;
+            tmpY = 2.1*tmpX_old*tmpY - tmpY/tmpX_old*0.8 - 0.98*tmpX_old + fPars.yFix;
+            // tmpX = tmpX*(tmpX+tmpY/3.0) - tmpY*tmpY + fPars.xFix;
+            // tmpY = 2*tmpX_old*tmpY + tmpX_old/20.0 + fPars.yFix;
+        } while (((tmpX*tmpX + tmpY*tmpY) <= fPars.maxLength) && (i < fPars.maxIterations));
+        
+        return  i;
+    }
+    
 }
