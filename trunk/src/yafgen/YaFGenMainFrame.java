@@ -83,11 +83,11 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     /** verifcation the input fields: integer */
     private InputVerifier myIntegerVerifier;
     
-    /** the selected color set to be used when drawing a fractal */
-    private int selectedColorSet = 1;
+    /** table for IFS input matrix */
+    private JTable tableIFS;
     
-    /** todo */
-    JTable tableIFS;
+    /** last directory of load/save operation */
+    private String lastDir;
     
     /** Creates new form YAFGMainFrame */
     public YaFGenMainFrame() {
@@ -137,17 +137,16 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalFrame = new JFrame("YaFGen - Yet Another Fractal Generator, Version 1.1, August 2007");
         fractalFrame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         
+// todo - does not work
 //        create Mac about box
 //        if (System.getProperty("mrj.version") != null) {
 //            new MacOSAboutHandler();
 //        }
-        
-//  todo        apple.laf.useScreenMenuBar = true;
+//        apple.laf.useScreenMenuBar = true;
         
         jMenuItemMandelbrot.setSelected(true);
         jMenuColorSet1.setSelected(true);
         
-        // todo
         fPars.setDefaultParameters( null );
         fractalImage = new FractalMandelbrot(this, fPars);
         fPars.setDefaultParameters( fractalImage );
@@ -162,8 +161,8 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         // move the window/frame of the parameter panel to the right of the fractal frame
         this.setLocation(fractalFrame.getWidth()+fractalFrame.getX(),0);
         
-        fPars.sizeX = fractalImage.getSize().width;
-        fPars.sizeY = fractalImage.getSize().height;
+        fPars.setSizeX( fractalImage.getSize().width );
+        fPars.setSizeY( fractalImage.getSize().height );
         
         refreshInputFields();
         
@@ -184,7 +183,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             fractalImage.repaint();
             
             // if the drawing is finished, also stop the timer, because we don't need it anymore
-            if( fractalImage.finishedDrawing() )
+            if( fractalImage.getFinishedDrawing() )
                 timer.stop();
         }
         
@@ -212,14 +211,14 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             // user did only click, but not drag => define fix point, do not zoom
             Point pointClicked = e.getPoint();
             
-            fPars.xFix = fPars.xMin +
-                    pointClicked.getX() * ((fPars.xMax - fPars.xMin) / fPars.sizeX );
-            fPars.yFix = fPars.yMax -
-                    pointClicked.getY() * ((fPars.yMax - fPars.yMin) / fPars.sizeY );
+            fPars.setXFix( fPars.getXMin() +
+                    pointClicked.getX() * ((fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX() ) );
+            fPars.setYFix( fPars.getYMax() -
+                    pointClicked.getY() * ((fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY() ) );
             
-            fractalXFix.setText(Double.toString(fPars.xFix));
+            fractalXFix.setText(Double.toString(fPars.getXFix()));
             fractalXFix.moveCaretPosition(0);
-            fractalYFix.setText(Double.toString(fPars.yFix));
+            fractalYFix.setText(Double.toString(fPars.getYFix()));
             fractalYFix.moveCaretPosition(0);
             
             pointMouseDraggedStart = null;
@@ -248,35 +247,35 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         if( e.getButton() == MouseEvent.BUTTON1 ) {
             System.out.println( this.getClass() + "zoom in" );
             
-            double xMinNew = fPars.xMin + pointMouseDraggedStart.getX() * ( (fPars.xMax - fPars.xMin) / fPars.sizeX );
-            fPars.xMax = fPars.xMax - (fPars.sizeX - pointMouseDraggedEnd.getX()) * ( (fPars.xMax - fPars.xMin) / fPars.sizeX );
-            double yMinNew = fPars.yMax - pointMouseDraggedEnd.getY() * ( (fPars.yMax - fPars.yMin) / fPars.sizeY );
-            fPars.yMax = fPars.yMax - pointMouseDraggedStart.getY() * ( (fPars.yMax - fPars.yMin) / fPars.sizeY );
-            fPars.xMin = xMinNew;
-            fPars.yMin = yMinNew;
+            double xMinNew = fPars.getXMin() + pointMouseDraggedStart.getX() * ( (fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX() );
+            fPars.setXMax( fPars.getXMax() - (fPars.getSizeX() - pointMouseDraggedEnd.getX()) * ( (fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX() ) );
+            double yMinNew = fPars.getYMax() - pointMouseDraggedEnd.getY() * ( (fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY() );
+            fPars.setYMax( fPars.getYMax() - pointMouseDraggedStart.getY() * ( (fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY() ) );
+            fPars.setXMin( xMinNew );
+            fPars.setYMin( yMinNew );
         } else if ( e.getButton() == MouseEvent.BUTTON3 ) {
             System.out.println( this.getClass() + "zoom out" );
             
-            double xMinNew = fPars.xMin - pointMouseDraggedStart.getX() *
-                    ( (fPars.xMax - fPars.xMin) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX() ) );
-            fPars.xMax = fPars.xMax + (fPars.sizeX - pointMouseDraggedEnd.getX()) *
-                    ( (fPars.xMax - fPars.xMin) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX() ) );
-            double yMinNew = fPars.yMin - ( fPars.sizeY - pointMouseDraggedEnd.getY()) *
-                    ( (fPars.yMax - fPars.yMin) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY() ) );
-            fPars.yMax = fPars.yMax + pointMouseDraggedStart.getY() *
-                    ( (fPars.yMax - fPars.yMin) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY() ) );
-            fPars.xMin = xMinNew;
-            fPars.yMin = yMinNew;
+            double xMinNew = fPars.getXMin() - pointMouseDraggedStart.getX() *
+                    ( (fPars.getXMax() - fPars.getXMin()) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX() ) );
+            fPars.setXMax( fPars.getXMax() + (fPars.getSizeX() - pointMouseDraggedEnd.getX()) *
+                    ( (fPars.getXMax() - fPars.getXMin()) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX() ) ) );
+            double yMinNew = fPars.getYMin() - ( fPars.getSizeY() - pointMouseDraggedEnd.getY()) *
+                    ( (fPars.getYMax() - fPars.getYMin()) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY() ) );
+            fPars.setYMax( fPars.getYMax() + pointMouseDraggedStart.getY() *
+                    ( (fPars.getYMax() - fPars.getYMin()) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY() ) ) );
+            fPars.setXMin( xMinNew );
+            fPars.setYMin(yMinNew );
         }
         
         // update input fields
-        fractalXMin.setText(Double.toString(fPars.xMin));
+        fractalXMin.setText(Double.toString(fPars.getXMin()));
         fractalXMin.moveCaretPosition(0);
-        fractalXMax.setText(Double.toString(fPars.xMax));
+        fractalXMax.setText(Double.toString(fPars.getXMax()));
         fractalXMax.moveCaretPosition(0);
-        fractalYMin.setText(Double.toString(fPars.yMin));
+        fractalYMin.setText(Double.toString(fPars.getYMin()));
         fractalYMin.moveCaretPosition(0);
-        fractalYMax.setText(Double.toString(fPars.yMax));
+        fractalYMax.setText(Double.toString(fPars.getYMax()));
         fractalYMax.moveCaretPosition(0);
         
         pointMouseDraggedStart = null;
@@ -1311,26 +1310,33 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         );
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void jMenuItemManowarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemManowarActionPerformed
-// TODO add your handling code here:
+        fractalType.setSelectedComponent(jPanelMandelJulia);
+        fractalTypeManowar.setSelected(true);
     }//GEN-LAST:event_jMenuItemManowarActionPerformed
-
+    
     private void jMenuItemJuliaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJuliaActionPerformed
-// TODO add your handling code here:
+        fractalType.setSelectedComponent(jPanelMandelJulia);
+        fractalTypeJulia.setSelected(true);
     }//GEN-LAST:event_jMenuItemJuliaActionPerformed
     
+    /**
+     * 
+     * @param evt 
+     */
     private void jMenuItemLoadParametersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadParametersActionPerformed
         String msg = "Load Fractal Parameters from File";
         FileDialog file = new FileDialog(this, msg, FileDialog.LOAD);
         file.setFile("*.yafgen");  // set initial filename filter
+        // does not work file.setFilenameFilter(new MyFilenameFilter() );
+        file.setDirectory(lastDir);
         
-        // todo letztes dir merken
-        // todo does not work file.setFilenameFilter(new MyFilenameFilter() );
         file.setVisible(true); // Blocks
         
         String curFile;
         if ((curFile = file.getFile()) != null) {
+            lastDir = file.getDirectory();
             String filename = file.getDirectory() + curFile;
             // curFile ends in .*.* if file does not exist
             byte[] data;
@@ -1348,12 +1354,11 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 e.close();
                 
             } catch ( IOException e) {
-                // todo
                 e.printStackTrace();
             }
         }
         
-        switch( fPars.currentFractalType ) {
+        switch( fPars.getCurrentFractalType() ) {
             case 1:
                 jMenuItemMandelbrot.setSelected(true);
                 fractalType.setSelectedIndex(0);
@@ -1404,7 +1409,24 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 
         }
         
-        // todo  jMenuColorSet1.setSelected(true);
+        switch( fPars.getSelectedColorSet() ) {
+            case 1:
+                jMenuColorSet1.setSelected(true);
+                break;
+                
+            case 2:
+                jMenuColorSet2.setSelected(true);
+                break;
+                
+            case 3:
+                jMenuColorSet3.setSelected(true);
+                break;
+                
+            case 4:
+                jMenuColorSet4.setSelected(true);
+                break;
+        }
+        
         // todo resize manually?
         
     }//GEN-LAST:event_jMenuItemLoadParametersActionPerformed
@@ -1418,19 +1440,19 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     }//GEN-LAST:event_jMenuItemSetSize86ActionPerformed
     
     private void jMenuColorSet4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet4ActionPerformed
-        selectedColorSet = 4;
+        fPars.setSelectedColorSet( 4 );
     }//GEN-LAST:event_jMenuColorSet4ActionPerformed
     
     private void jMenuColorSet3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet3ActionPerformed
-        selectedColorSet = 3;
+        fPars.setSelectedColorSet( 3 );
     }//GEN-LAST:event_jMenuColorSet3ActionPerformed
     
     private void jMenuColorSet2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet2ActionPerformed
-        selectedColorSet = 2;
+        fPars.setSelectedColorSet( 2 );
     }//GEN-LAST:event_jMenuColorSet2ActionPerformed
     
     private void jMenuColorSet1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet1ActionPerformed
-        selectedColorSet = 1;
+        fPars.setSelectedColorSet( 1 );
     }//GEN-LAST:event_jMenuColorSet1ActionPerformed
     
     private void jMenuItemSaveParametersAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveParametersAsActionPerformed
@@ -1438,13 +1460,14 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         String msg = "Save Fractal Parameters as File";
         FileDialog file = new FileDialog(this, msg, FileDialog.SAVE);
         file.setFile("*.yafgen");  // set initial filename filter
+        file.setDirectory(lastDir);
         
-        // todo letztes dir merken
-        // todo does not work file.setFilenameFilter(new MyFilenameFilter() );
+        // does not work file.setFilenameFilter(new MyFilenameFilter() );
         file.setVisible(true); // Blocks
         
         String curFile;
         if ((curFile = file.getFile()) != null) {
+            lastDir = file.getDirectory();
             String filename = file.getDirectory() + curFile;
             // curFile ends in .*.* if file does not exist
             byte[] data;
@@ -1454,23 +1477,13 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             }
             
             try {
-            /*
-             FileOutputStream fos = new FileOutputStream(filename);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-             
-            oos.writeObject(fPars);
-             
-            oos.close();
-             *             **/
                 XMLEncoder e = new XMLEncoder(
                         new BufferedOutputStream(
                         new FileOutputStream(filename)));
                 e.writeObject( fPars );
                 e.close();
                 
-//            } catch ( IOException e) {
             } catch ( IOException e) {
-                // todo
                 e.printStackTrace();
             }
         }
@@ -1494,6 +1507,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     
     private void jMenuItemMandelbrotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMandelbrotActionPerformed
         fractalType.setSelectedComponent(jPanelMandelJulia);
+        fractalTypeMandelbrot.setSelected(true);
     }//GEN-LAST:event_jMenuItemMandelbrotActionPerformed
     
     private void jMenuItemQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemQuitActionPerformed
@@ -1506,19 +1520,25 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     }//GEN-LAST:event_jMenuItemNLFActionPerformed
     
     private void jMenuItemSaveImageAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveImageAsActionPerformed
-        // todo how to make sure the paining is complete?
-        //if fractalImage.finishedDrawing()
+        // make sure the paining process is complete
+        if( fractalImage.getFinishedDrawing() != true ) {
+            JOptionPane.showMessageDialog(this, "Drawing still in progress. " +
+                    "You cannot save the image, before drawing is finished or interrupted.",
+                    "Save Image - Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         
         String msg = "Save Fractal Image as File";
         FileDialog file = new FileDialog(this, msg, FileDialog.SAVE);
         file.setFile("*.jpeg");  // set initial filename filter
+        file.setDirectory(lastDir);
         
-        // todo letztes dir merken
-        // todo does not work file.setFilenameFilter(new MyFilenameFilter() );
+        // does not work file.setFilenameFilter(new MyFilenameFilter() );
         file.setVisible(true); // Blocks
         
         String curFile;
         if ((curFile = file.getFile()) != null) {
+            lastDir = file.getDirectory();
             String filename = file.getDirectory() + curFile;
             // curFile ends in .*.* if file does not exist
             byte[] data;
@@ -1539,10 +1559,10 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private void setSizeManuallyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSizeManuallyActionPerformed
         // set window size to the enteres values
         try {
-            fPars.sizeX = Integer.parseInt(fractalSizeX.getText());
-            fPars.sizeY = Integer.parseInt(fractalSizeY.getText());
+            fPars.setSizeX( Integer.parseInt(fractalSizeX.getText()));
+            fPars.setSizeY( Integer.parseInt(fractalSizeY.getText()));
             
-            setNewSize(fPars.sizeX,fPars.sizeY);
+            setNewSize(fPars.getSizeX(),fPars.getSizeY());
         } catch (NumberFormatException nfe) { }
     }//GEN-LAST:event_setSizeManuallyActionPerformed
     
@@ -1550,7 +1570,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         // user pressed the stop button, so interrupt the infinite loop
         // we do this by just setting the flag; in the loop the flag is checked
         System.out.println("stop button pressed");
-        fPars.infiniteLoopInterrupted = true;
+        fPars.setInfiniteLoopInterrupted(true);
     }//GEN-LAST:event_buttonStopInfiniteLoopActionPerformed
     
     private void setDefaultValuesIFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setDefaultValuesIFSActionPerformed
@@ -1569,10 +1589,10 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     }//GEN-LAST:event_setDefaultValuesNLFActionPerformed
     
     private void setNewSize( int x, int y) {
-        fPars.sizeX = x;
-        fPars.sizeY = y;
-        fractalSizeX.setText(Integer.toString(fPars.sizeX));
-        fractalSizeY.setText(Integer.toString(fPars.sizeY));
+        fPars.setSizeX(x);
+        fPars.setSizeY(y);
+        fractalSizeX.setText(Integer.toString(fPars.getSizeX()));
+        fractalSizeY.setText(Integer.toString(fPars.getSizeY()));
         
         // because we set a new size of the image, we need to interrupt the worker
         fractalImage.interruptWorker();
@@ -1609,10 +1629,10 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             // check if the fractalImage was really added to the container
             // note: it was not added, if there was an input error (see below)
             if( fractalImage.getSize().width != 0 ) {
-                fPars.sizeX = fractalImage.getSize().width;
-                fPars.sizeY = fractalImage.getSize().height;
-                fractalSizeX.setText(Integer.toString(fPars.sizeX));
-                fractalSizeY.setText(Integer.toString(fPars.sizeY));
+                fPars.setSizeX( fractalImage.getSize().width );
+                fPars.setSizeY( fractalImage.getSize().height );
+                fractalSizeX.setText(Integer.toString(fPars.getSizeX()));
+                fractalSizeY.setText(Integer.toString(fPars.getSizeY()));
             }
             
             FractalImage oldFractalImage = fractalImage;
@@ -1622,7 +1642,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             
             fractalImage = null;
             
-            fPars.infiniteLoopInterrupted = false;
+            fPars.setInfiniteLoopInterrupted(false);
             
             
             // find out what fractal type is selected
@@ -1703,73 +1723,72 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     
     /** read all the parameters from the input fields in the GUI */
     private void refreshFractalParameters() {
-        fPars.sizeX = Integer.parseInt(fractalSizeX.getText());
-        fPars.sizeY = Integer.parseInt(fractalSizeY.getText());
+        fPars.setSizeX(Integer.parseInt(fractalSizeX.getText()));
+        fPars.setSizeY(Integer.parseInt(fractalSizeY.getText()));
         
-        fPars.maxLength = Double.parseDouble(fractalMaxLen.getText());
-        fPars.maxIterations = Integer.parseInt(fractalMaxIter.getText());
-        fPars.xFix = Double.parseDouble(fractalXFix.getText());
-        fPars.yFix = Double.parseDouble(fractalYFix.getText());
-        fPars.xMin = Double.parseDouble(fractalXMin.getText());
-        fPars.xMax = Double.parseDouble(fractalXMax.getText());
-        fPars.yMin = Double.parseDouble(fractalYMin.getText());
-        fPars.yMax = Double.parseDouble(fractalYMax.getText());
+        fPars.setMaxLength( Double.parseDouble(fractalMaxLen.getText()));
+        fPars.setMaxIterations( Integer.parseInt(fractalMaxIter.getText()));
+        fPars.setXFix( Double.parseDouble(fractalXFix.getText()));
+        fPars.setYFix( Double.parseDouble(fractalYFix.getText()));
+        fPars.setXMin( Double.parseDouble(fractalXMin.getText()));
+        fPars.setXMax( Double.parseDouble(fractalXMax.getText()));
+        fPars.setYMin( Double.parseDouble(fractalYMin.getText()));
+        fPars.setYMax( Double.parseDouble(fractalYMax.getText()));
         
-        fPars.xStart = Double.parseDouble(fractalXStart.getText());
-        fPars.yStart = Double.parseDouble(fractalYStart.getText());
-        fPars.aFix = Double.parseDouble(fractalA.getText());
-        fPars.bFix = Double.parseDouble(fractalB.getText());
-        fPars.sleep = Integer.parseInt(fractalSleep.getText());
-        fPars.count = Long.parseLong(fractalCount.getText());
-        fPars.infiniteLoop = checkBoxInfiniteLoop.isSelected();
+        fPars.setXStart( Double.parseDouble(fractalXStart.getText()));
+        fPars.setYStart( Double.parseDouble(fractalYStart.getText()));
+        fPars.setAFix( Double.parseDouble(fractalA.getText()));
+        fPars.setBFix( Double.parseDouble(fractalB.getText()));
+        fPars.setSleep( Integer.parseInt(fractalSleep.getText()));
+        fPars.setCount( Long.parseLong(fractalCount.getText()));
+        fPars.setInfiniteLoop( checkBoxInfiniteLoop.isSelected());
         
-        fPars.aJFix = Double.parseDouble(fractalAJFix.getText());
-        fPars.bJFix = Double.parseDouble(fractalBJFix.getText());
-        fPars.cJFix = Double.parseDouble(fractalCJFix.getText());
+        fPars.setAJFix( Double.parseDouble(fractalAJFix.getText()));
+        fPars.setBJFix( Double.parseDouble(fractalBJFix.getText()));
+        fPars.setCJFix( Double.parseDouble(fractalCJFix.getText()));
     }
     
     /** write all the parameters to the GUI */
     private void refreshInputFields() {
-        fractalSizeX.setText(Integer.toString(fPars.sizeX));
-        fractalSizeY.setText(Integer.toString(fPars.sizeY));
+        fractalSizeX.setText(Integer.toString(fPars.getSizeX()));
+        fractalSizeY.setText(Integer.toString(fPars.getSizeY()));
         
-        fractalXMin.setText(Double.toString(fPars.xMin));
+        fractalXMin.setText(Double.toString(fPars.getXMin()));
         fractalXMin.moveCaretPosition(0);
-        fractalXMax.setText(Double.toString(fPars.xMax));
+        fractalXMax.setText(Double.toString(fPars.getXMax()));
         fractalXMax.moveCaretPosition(0);
-        fractalYMin.setText(Double.toString(fPars.yMin));
+        fractalYMin.setText(Double.toString(fPars.getYMin()));
         fractalYMin.moveCaretPosition(0);
-        fractalYMax.setText(Double.toString(fPars.yMax));
+        fractalYMax.setText(Double.toString(fPars.getYMax()));
         fractalYMax.moveCaretPosition(0);
-        fractalXFix.setText(Double.toString(fPars.xFix));
+        fractalXFix.setText(Double.toString(fPars.getXFix()));
         fractalXFix.moveCaretPosition(0);
-        fractalYFix.setText(Double.toString(fPars.yFix));
+        fractalYFix.setText(Double.toString(fPars.getYFix()));
         fractalYFix.moveCaretPosition(0);
-        fractalMaxLen.setText(Double.toString(fPars.maxLength));
+        fractalMaxLen.setText(Double.toString(fPars.getMaxLength()));
         fractalMaxLen.moveCaretPosition(0);
-        fractalMaxIter.setText(Integer.toString(fPars.maxIterations));
+        fractalMaxIter.setText(Integer.toString(fPars.getMaxIterations()));
         fractalMaxIter.moveCaretPosition(0);
         
-        fractalXStart.setText(Double.toString(fPars.xStart));
+        fractalXStart.setText(Double.toString(fPars.getXStart()));
         fractalXStart.moveCaretPosition(0);
-        fractalYStart.setText(Double.toString(fPars.yStart));
+        fractalYStart.setText(Double.toString(fPars.getYStart()));
         fractalYStart.moveCaretPosition(0);
-        fractalA.setText(Double.toString(fPars.aFix));
+        fractalA.setText(Double.toString(fPars.getAFix()));
         fractalA.moveCaretPosition(0);
-        fractalB.setText(Double.toString(fPars.bFix));
+        fractalB.setText(Double.toString(fPars.getBFix()));
         fractalB.moveCaretPosition(0);
-        fractalSleep.setText(Integer.toString(fPars.sleep));
-        fractalCount.setText(Long.toString(fPars.count));
-        checkBoxInfiniteLoop.setSelected(fPars.infiniteLoop);
+        fractalSleep.setText(Integer.toString(fPars.getSleep()));
+        fractalCount.setText(Long.toString(fPars.getCount()));
+        checkBoxInfiniteLoop.setSelected(fPars.isInfiniteLoop());
         
-        fractalAJFix.setText(Double.toString(fPars.aJFix));
+        fractalAJFix.setText(Double.toString(fPars.getAJFix()));
         fractalAJFix.moveCaretPosition(0);
-        fractalBJFix.setText(Double.toString(fPars.bJFix));
+        fractalBJFix.setText(Double.toString(fPars.getBJFix()));
         fractalBJFix.moveCaretPosition(0);
-        fractalCJFix.setText(Double.toString(fPars.cJFix));
+        fractalCJFix.setText(Double.toString(fPars.getCJFix()));
         fractalCJFix.moveCaretPosition(0);
         
-        // todo table?!?
         tableIFS.repaint();
     }
     
@@ -2077,10 +2096,10 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         
     }
     
-    public int getSelectedColorSet() {
-        return selectedColorSet;
-    }
-    
+    /**
+     * hide or show the text that indicates that calculation is still running
+     * @param flag 
+     */
     public void setCalculatingLabel( boolean flag ) {
         jLabelCalculating.setVisible( flag );
     }

@@ -48,31 +48,31 @@ import java.util.Vector;
 public class FractalParameters implements java.io.Serializable {
     
     // FractalImage: all
-    public int sizeX;
-    public int sizeY;
-    public double xMin;
-    public double xMax;
-    public double yMin;
-    public double yMax;
-    public double xFix;
-    public double yFix;
-    public double maxLength;
-    public int maxIterations;
+    private int sizeX;
+    private int sizeY;
+    private double xMin;
+    private double xMax;
+    private double yMin;
+    private double yMax;
+    private double xFix;
+    private double yFix;
+    private double maxLength;
+    private int maxIterations;
     
     // NLF and Jumper
-    public double xStart;
-    public double yStart;
-    public double aFix;
-    public double bFix;
-    public double cFix;
-    public double aJFix;
-    public double bJFix;
-    public double cJFix;
-    public long   range;
-    public int    sleep;
-    public long   count;
-    public boolean infiniteLoop;
-    public boolean infiniteLoopInterrupted;
+    private double xStart;
+    private double yStart;
+    private double aFix;
+    private double bFix;
+    private double cFix;
+    private double aJFix;
+    private double bJFix;
+    private double cJFix;
+    private long   range;
+    private int    sleep;
+    private long   count;
+    private boolean infiniteLoop;
+    private boolean infiniteLoopInterrupted;
     
     // IFS
     public Vector<Double> a;
@@ -94,14 +94,17 @@ public class FractalParameters implements java.io.Serializable {
      
      */
     
-    /** 
+    /** Fractal Type, which is a number with the following meaning:
         MANDEL  = 1
         JULIA   = 2
         IFS     = 3
         NLF     = 4
         JUMPER  = 5
      */
-    public int currentFractalType;
+    private int currentFractalType;
+    
+    /** the selected color set to be used when drawing a fractal */
+    private int selectedColorSet = 1;
     
     
     /** Creates a new instance of FractalParameters */
@@ -171,8 +174,6 @@ public class FractalParameters implements java.io.Serializable {
             setXMax(9);
             setYMin(-5);
             setYMax(9);
-            // todo
-            currentFractalType = 4;
         }
         
         if (myFImage instanceof FractalIFS) {
@@ -532,6 +533,14 @@ public class FractalParameters implements java.io.Serializable {
     
     public void setCurrentFractalType(int currentFractalType) {
         this.currentFractalType = currentFractalType;
+    }
+
+    public int getSelectedColorSet() {
+        return selectedColorSet;
+    }
+
+    public void setSelectedColorSet(int selectedColorSet) {
+        this.selectedColorSet = selectedColorSet;
     }
     
 }

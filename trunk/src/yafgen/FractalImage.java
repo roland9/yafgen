@@ -171,7 +171,7 @@ public abstract class FractalImage extends JPanel {
         return bufferedImage;
     }
     
-    boolean finishedDrawing() {
+    boolean getFinishedDrawing() {
         return finishedDrawing;
     }
     
@@ -179,7 +179,7 @@ public abstract class FractalImage extends JPanel {
         Color c;
         
         // find out color value by some weird algo
-        switch( mainFrame.getSelectedColorSet() ) {
+        switch( fPars.getSelectedColorSet() ) {
             case 1:
                 if( iterations != fPars.maxIterations ) {
                     float floatIterations = (float)iterations/(float)fPars.maxIterations;
@@ -236,7 +236,7 @@ public abstract class FractalImage extends JPanel {
         //redCol = (redCol+10)%256;
         //greenCol = (greenCol+20)%256;
         
-        switch( mainFrame.getSelectedColorSet() ) {
+        switch( fPars.getSelectedColorSet() ) {
             case 1:
                 redCol = (redCol+1)%256;
                 greenCol = (greenCol+15)%256;
