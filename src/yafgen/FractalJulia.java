@@ -48,9 +48,9 @@ public class FractalJulia extends FractalRasterIteration {
         do {
             i++;
             tmpX_old = tmpX;
-            tmpX = tmpX*tmpX - tmpY*tmpY + fPars.xFix;
-            tmpY = 2*tmpX_old*tmpY + fPars.yFix;
-        } while (((tmpX*tmpX + tmpY*tmpY) <= fPars.maxLength) && (i < fPars.maxIterations));
+            tmpX = tmpX*tmpX - tmpY*tmpY + fPars.getXFix();
+            tmpY = 2*tmpX_old*tmpY + fPars.getYFix();
+        } while (((tmpX*tmpX + tmpY*tmpY) <= fPars.getMaxLength()) && (i < fPars.getMaxIterations()));
         
         return  i;
     }

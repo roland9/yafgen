@@ -50,7 +50,7 @@ public class FractalMandelbrot extends FractalRasterIteration {
             tmpX_old = tmpX;
             tmpX = tmpX*tmpX - tmpY*tmpY + x;
             tmpY = 2*tmpX_old*tmpY + y;
-        } while (((tmpX*tmpX + tmpY*tmpY) <= fPars.maxLength) && (i < fPars.maxIterations));
+        } while (((tmpX*tmpX + tmpY*tmpY) <= fPars.getMaxLength()) && (i < fPars.getMaxIterations()));
         
         return  i;
     }
