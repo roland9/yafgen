@@ -48,11 +48,11 @@ public class FractalManowar extends FractalRasterIteration {
         do {
             i++;
             tmpX_old = tmpX;
-            tmpX = tmpX*tmpX/tmpY/10.0 - tmpY*tmpX*tmpX/5.0 + fPars.xFix;
-            tmpY = 2.1*tmpX_old*tmpY - tmpY/tmpX_old*0.8 - 0.98*tmpX_old + fPars.yFix;
+            tmpX = tmpX*tmpX/tmpY/10.0 - tmpY*tmpX*tmpX/5.0 + fPars.getXFix();
+            tmpY = 2.1*tmpX_old*tmpY - tmpY/tmpX_old*0.8 - 0.98*tmpX_old + fPars.getYFix();
             // tmpX = tmpX*(tmpX+tmpY/3.0) - tmpY*tmpY + fPars.xFix;
             // tmpY = 2*tmpX_old*tmpY + tmpX_old/20.0 + fPars.yFix;
-        } while (((tmpX*tmpX + tmpY*tmpY) <= fPars.maxLength) && (i < fPars.maxIterations));
+        } while (((tmpX*tmpX + tmpY*tmpY) <= fPars.getMaxLength()) && (i < fPars.getMaxIterations()));
         
         return  i;
     }

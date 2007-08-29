@@ -71,7 +71,7 @@ public abstract class FractalImage extends JPanel {
         
         fPars = myFPars;
         
-        bufferedImage = new BufferedImage(fPars.sizeX, fPars.sizeY, BufferedImage.TYPE_USHORT_555_RGB);
+        bufferedImage = new BufferedImage(fPars.getSizeX(), fPars.getSizeY(), BufferedImage.TYPE_USHORT_555_RGB);
         graphics = bufferedImage.createGraphics();
     }
     
@@ -119,7 +119,7 @@ public abstract class FractalImage extends JPanel {
         
         // System.nanoTime only in Java 1.5
         //  long deltaSeconds, initSeconds = System.nanoTime();
-        sizeX_old = fPars.sizeX; sizeY_old = fPars.sizeY;
+        sizeX_old = fPars.getSizeX(); sizeY_old = fPars.getSizeY();
         
         if( repaintFlag == true ) {
             if( worker != null ) {
@@ -128,7 +128,7 @@ public abstract class FractalImage extends JPanel {
             }
             
             // create new buffer for new worker
-            bufferedImage = new BufferedImage(fPars.sizeX, fPars.sizeY, BufferedImage.TYPE_USHORT_555_RGB);
+            bufferedImage = new BufferedImage(fPars.getSizeX(), fPars.getSizeY(), BufferedImage.TYPE_USHORT_555_RGB);
             graphics = bufferedImage.createGraphics();
             
             // create new worker ...
@@ -164,7 +164,7 @@ public abstract class FractalImage extends JPanel {
     }
     
     public Dimension getPreferredSize() {
-        return(new Dimension(fPars.sizeX, fPars.sizeY));
+        return(new Dimension(fPars.getSizeX(), fPars.getSizeY()));
     }
     
     public BufferedImage getBufferedImage() {
@@ -181,40 +181,40 @@ public abstract class FractalImage extends JPanel {
         // find out color value by some weird algo
         switch( fPars.getSelectedColorSet() ) {
             case 1:
-                if( iterations != fPars.maxIterations ) {
-                    float floatIterations = (float)iterations/(float)fPars.maxIterations;
+                if( iterations != fPars.getMaxIterations() ) {
+                    float floatIterations = (float)iterations/(float)fPars.getMaxIterations();
                     c = Color.getHSBColor( floatIterations, 1.0F, 1.0F );
                 } else
                     c = Color.BLACK;
                 break;
                 
             case 2:
-                if( iterations != fPars.maxIterations ) {
-                    float floatIterations = (float)iterations/(float)fPars.maxIterations + 0.8F;
+                if( iterations != fPars.getMaxIterations() ) {
+                    float floatIterations = (float)iterations/(float)fPars.getMaxIterations() + 0.8F;
                     c = Color.getHSBColor( floatIterations, 1.0F, 1.0F );
                 } else
                     c = Color.BLACK;
                 break;
                 
             case 3:
-                if( iterations != fPars.maxIterations ) {
-                    float floatIterations = (float)iterations/(float)fPars.maxIterations *5.2F;
+                if( iterations != fPars.getMaxIterations() ) {
+                    float floatIterations = (float)iterations/(float)fPars.getMaxIterations() *5.2F;
                     c = Color.getHSBColor( floatIterations, 0.4F, 1.0F );
                 } else
                     c = Color.BLACK;
                 break;
                 
             case 4:
-                if( iterations != fPars.maxIterations ) {
-                    float floatIterations = (float)iterations/(float)fPars.maxIterations *10.0F;
+                if( iterations != fPars.getMaxIterations() ) {
+                    float floatIterations = (float)iterations/(float)fPars.getMaxIterations() *10.0F;
                     c = Color.getHSBColor( floatIterations, 0.8F, 1.0F );
                 } else
                     c = Color.BLACK;
                 break;
                 
             default:
-                if( iterations != fPars.maxIterations ) {
-                    float floatIterations = (float)iterations/(float)fPars.maxIterations;
+                if( iterations != fPars.getMaxIterations() ) {
+                    float floatIterations = (float)iterations/(float)fPars.getMaxIterations();
                     c = Color.getHSBColor( floatIterations, 1.0F, 1.0F );
                 } else
                     c = Color.BLACK;

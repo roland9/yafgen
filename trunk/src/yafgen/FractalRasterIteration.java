@@ -80,19 +80,19 @@ public abstract class FractalRasterIteration extends FractalImage {
             
             // start with tiles of the size 16x16
             for( int loopTiles = 16; loopTiles > 0; loopTiles/=2 ){
-                double x = fPars.xMin;
-                double y = fPars.yMax;
+                double x = fPars.getXMin();
+                double y = fPars.getYMax();
                 // calculate the value by which we need to increment the x/y numbers in every loop
-                xStep = (fPars.xMax - fPars.xMin)/(double)fPars.sizeX * loopTiles;
-                yStep = (fPars.yMax - fPars.yMin)/(double)fPars.sizeY * loopTiles;
+                xStep = (fPars.getXMax() - fPars.getXMin())/(double)fPars.getSizeX() * loopTiles;
+                yStep = (fPars.getYMax() - fPars.getYMin())/(double)fPars.getSizeY() * loopTiles;
                 
                 // loop through the x axis
-                for (loopX = 0; loopX < fPars.sizeX; loopX+=loopTiles) {
+                for (loopX = 0; loopX < fPars.getSizeX(); loopX+=loopTiles) {
                     
-                    y = fPars.yMax;
+                    y = fPars.getYMax();
                     
                     // loop through the y axis
-                    for (loopY = 0; loopY < fPars.sizeY; loopY+=loopTiles) {
+                    for (loopY = 0; loopY < fPars.getSizeY(); loopY+=loopTiles) {
                         
                         // if we have already calculated this pixel, then skip
                         if( ((loopY % oldLoopTiles) == 0) && ((loopX % oldLoopTiles)==0)) {

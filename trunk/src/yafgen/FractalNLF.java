@@ -48,7 +48,7 @@ public class FractalNLF extends FractalIterationFunction {
         
         // x[n] = abs(x[n-1]) -b*y[n-1] + a;  n>0
         // y[n] = x[n-1]
-        xNew = Math.abs(xIter) - fPars.bFix*yIter + fPars.aFix;
+        xNew = Math.abs(xIter) - fPars.getBFix()*yIter + fPars.getAFix();
         yNew = xIter;
                 
     }

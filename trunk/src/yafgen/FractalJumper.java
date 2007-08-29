@@ -49,8 +49,8 @@ public class FractalJumper extends FractalIterationFunction {
         // x[n+1] = y[n] - sign(x[n]) * sqrt( abs( b*x[n] - c ) )
         // y[n+1] = a - x[n]
         xNew = yIter + Math.signum(xIter) *
-                Math.sqrt( Math.abs( fPars.bJFix*xIter - fPars.cJFix ) );
-        yNew = fPars.aJFix - xIter;
+                Math.sqrt( Math.abs( fPars.getBJFix()*xIter - fPars.getCJFix() ) );
+        yNew = fPars.getAJFix() - xIter;
         
     }
 }

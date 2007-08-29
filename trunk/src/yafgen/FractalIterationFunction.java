@@ -88,10 +88,10 @@ public abstract class FractalIterationFunction extends FractalImage {
             q[i] /= p;
         }
         
-        xRange = (double)(fPars.xMax - fPars.xMin);
-        yRange = (double)(fPars.yMax - fPars.yMin);
-        xIter = fPars.xStart;
-        yIter = fPars.yStart;
+        xRange = (double)(fPars.getXMax() - fPars.getXMin());
+        yRange = (double)(fPars.getYMax() - fPars.getYMin());
+        xIter = fPars.getXStart();
+        yIter = fPars.getYStart();
         xPixel = 0;
         yPixel = 0;
         long count = 0L;
@@ -104,12 +104,12 @@ public abstract class FractalIterationFunction extends FractalImage {
         try {
             // as long as we did not reach the number of iterations;
             // or the user did not press 'stop' yet (for infinite loops only)
-            while ( (count < fPars.count) || fPars.infiniteLoop ) {
-                if( fPars.infiniteLoopInterrupted ) {
+            while ( (count < fPars.getCount()) || fPars.isInfiniteLoop() ) {
+                if( fPars.isInfiniteLoopInterrupted() ) {
                     break;
                 }
                 
-                if (xIter*xIter + yIter*yIter > fPars.range) {
+                if (xIter*xIter + yIter*yIter > fPars.getRange() ) {
                     System.out.println("Overflow!");
                     return null;
                 }
@@ -118,12 +118,12 @@ public abstract class FractalIterationFunction extends FractalImage {
                 doIteration();
                 
                 // now calculate the pixel on the screen
-                xPixel = (int)(fPars.sizeX * (xNew - fPars.xMin) / xRange);
-                yPixel = fPars.sizeY - (int)(fPars.sizeY * (yNew - fPars.yMin) /yRange);
+                xPixel = (int)(fPars.getSizeX() * (xNew - fPars.getXMin()) / xRange);
+                yPixel = fPars.getSizeY() - (int)(fPars.getSizeY() * (yNew - fPars.getYMin()) /yRange);
                 
                 // check if the pixel is in the defined range; if not just skip painting
                 if( (count>7L) &&
-                        (xPixel>=0) && (xPixel<fPars.sizeX) && (yPixel>=0) && (yPixel<fPars.sizeY) ) {
+                        (xPixel>=0) && (xPixel<fPars.getSizeX()) && (yPixel>=0) && (yPixel<fPars.getSizeY()) ) {
                     
                     // find out the color of this pixel
                     rgbCol = bufferedImage.getRGB(xPixel, yPixel);
@@ -148,7 +148,7 @@ public abstract class FractalIterationFunction extends FractalImage {
                         throw new InterruptedException();
                     }
                     // sleep that we can see the 'growing' of the image
-                    Thread.sleep(fPars.sleep);
+                    Thread.sleep(fPars.getSleep());
                 }
                 
             }
