@@ -20,3 +20,23 @@ along with YaFGen; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 To contact the author, please send an email to the following address: rgropmair "at" gmail.com
+
+
+New Features in Version 1.1, released August 29th, 2007
+
+    * New fractal type called “Manowar”
+    * Only one jar-file needed now (before an additional lib-directory was required) 
+    * After zoomin in/out, the drawing starts automatically 
+    * Load and save parameters in a file
+    * Save image in a file (jpeg or png)
+    * Choose from 4 different color sets 
+    * Improvements in user interface (menus, menu shortcuts, visual indication that it's still drawing/calculating, "About" dialog)
+    * fixed bug "refresh table IFS" and others 
+
+Planned Features for Later Releases
+
+    * Applet version
+    * Mac optimized version (menu styles, dialogs, ...)
+    * Animations
+    * Antialiasing 
+    * Additional fractal types 
