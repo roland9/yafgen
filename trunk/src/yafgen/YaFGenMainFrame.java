@@ -35,17 +35,34 @@
  */
 
 package yafgen;
+
 import javax.swing.*;
 import java.awt.geom.*;
 import java.awt.*;
 import javax.imageio.*;
 import java.io.*;
-
 import javax.swing.event.*;
 import java.awt.event.*;
 import javax.swing.table.AbstractTableModel;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import com.google.gdata.client.*;
+import com.google.gdata.client.calendar.*;
+import com.google.gdata.data.*;
+import com.google.gdata.data.extensions.*;
+import com.google.gdata.util.*;
+import com.google.gdata.client.photos.*;
+import com.google.gdata.data.appsforyourdomain.provisioning.*;
+import com.google.gdata.data.photos.*;
+import com.google.gdata.data.media.mediarss.*;
+import java.awt.image.*;
+import javax.imageio.*;
+import javax.swing.*;
+import java.awt.*;
+import com.google.gdata.data.media.*;
 
 /**
  *
@@ -54,220 +71,215 @@ import java.beans.XMLEncoder;
  * This Java application calculates and displays several fractals
  *
  */
-public class YaFGenMainFrame extends javax.swing.JFrame
-        implements ActionListener, MouseInputListener {
-    
+public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListener, MouseInputListener {
+
     /** frame for the fractal image */
     private JFrame fractalFrame;
-    
     /** the fractal image */
     private FractalImage fractalImage;
-    
     /** we need a timer so that the user can see the "growing" of the fractal image
      *  periodically the display is refreshed with the newest image
      */
-    private Timer timer;
-    
+    private javax.swing.Timer timer;
     /** we support dragging and clicking in the fractal image
      * dragging with left mouse button: zoom in
      * dragging with right mouse button: zoom out
      * clicking: set fix point, for Julia only */
-    private Point pointMouseDraggedStart, pointMouseDraggedEnd, oldPointMouse;
-    
+    private Point pointMouseDraggedStart;
+    private Point pointMouseDraggedEnd;
+    private Point oldPointMouse;
     /** here we store all the values that are changed by the user interface and are
      *  important for the calculations */
     private FractalParameters fPars;
-    
     /** verifcation the input fields: double */
     private InputVerifier myDoubleVerifier;
     /** verifcation the input fields: integer */
     private InputVerifier myIntegerVerifier;
-    
     /** table for IFS input matrix */
     private JTable tableIFS;
-    
     /** last directory of load/save operation */
     private String lastDir;
+    /** Picasa Logon, Google Email Account */
+    private String picasaLogon;
+    /** Picasa/Google Password */
+    private String picasaPassword;
+    /** Picasa Webservice Id */
+    public static final String picasaWebserviceId = "rgropmair-YaFGen-1.2";
+
+    private Image myImage1, myImage2, myImage3;
     
     /** Creates new form YAFGMainFrame */
     public YaFGenMainFrame() {
         initComponents();
-        
+
         myDoubleVerifier = new MyDoubleVerifier();
         myIntegerVerifier = new MyIntegerVerifier();
-        
-        fractalXMin.setInputVerifier( myDoubleVerifier );
-        fractalXMax.setInputVerifier( myDoubleVerifier );
-        fractalYMin.setInputVerifier( myDoubleVerifier );
-        fractalYMax.setInputVerifier( myDoubleVerifier );
-        
-        fractalXFix.setInputVerifier( myDoubleVerifier );
-        fractalYFix.setInputVerifier( myDoubleVerifier );
-        
-        fractalMaxIter.setInputVerifier( myIntegerVerifier );
-        fractalMaxLen.setInputVerifier( myDoubleVerifier );
-        
-        fractalSizeX.setInputVerifier( myIntegerVerifier );
-        fractalSizeY.setInputVerifier( myIntegerVerifier );
-        
-        fractalCount.setInputVerifier( myIntegerVerifier );
-        fractalSleep.setInputVerifier( myIntegerVerifier );
-        
-        
-        fractalXStart.setInputVerifier( myDoubleVerifier );
-        fractalYStart.setInputVerifier( myDoubleVerifier );
-        
-        fractalA.setInputVerifier( myDoubleVerifier );
-        fractalB.setInputVerifier( myDoubleVerifier );
-        
-        fractalAJFix.setInputVerifier( myDoubleVerifier );
-        fractalBJFix.setInputVerifier( myDoubleVerifier );
-        fractalCJFix.setInputVerifier( myDoubleVerifier );
-        
+
+        fractalXMin.setInputVerifier(myDoubleVerifier);
+        fractalXMax.setInputVerifier(myDoubleVerifier);
+        fractalYMin.setInputVerifier(myDoubleVerifier);
+        fractalYMax.setInputVerifier(myDoubleVerifier);
+
+        fractalXFix.setInputVerifier(myDoubleVerifier);
+        fractalYFix.setInputVerifier(myDoubleVerifier);
+
+        fractalMaxIter.setInputVerifier(myIntegerVerifier);
+        fractalMaxLen.setInputVerifier(myDoubleVerifier);
+
+        fractalSizeX.setInputVerifier(myIntegerVerifier);
+        fractalSizeY.setInputVerifier(myIntegerVerifier);
+
+        fractalCount.setInputVerifier(myIntegerVerifier);
+        fractalSleep.setInputVerifier(myIntegerVerifier);
+
+
+        fractalXStart.setInputVerifier(myDoubleVerifier);
+        fractalYStart.setInputVerifier(myDoubleVerifier);
+
+        fractalA.setInputVerifier(myDoubleVerifier);
+        fractalB.setInputVerifier(myDoubleVerifier);
+
+        fractalAJFix.setInputVerifier(myDoubleVerifier);
+        fractalBJFix.setInputVerifier(myDoubleVerifier);
+        fractalCJFix.setInputVerifier(myDoubleVerifier);
+
         fractalTypeMandelbrot.setSelected(true);
-        
-        tableIFS = new JTable( new MyTableModel() );
+
+        tableIFS = new JTable(new MyTableModel());
         jScrollPane1.setViewportView(tableIFS);
-        jumperPresets.setModel( new MyComboBoxModel() );
-        
+        jumperPresets.setModel(new MyComboBoxModel());
+
         getRootPane().setDefaultButton(repaintButton);
-        
+
         fPars = new FractalParameters();
-        
+
         fractalFrame = new JFrame("YaFGen - Yet Another Fractal Generator, Version 1.1, August 2007");
         fractalFrame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        
+
 // todo - does not work
 //        create Mac about box
 //        if (System.getProperty("mrj.version") != null) {
 //            new MacOSAboutHandler();
 //        }
 //        apple.laf.useScreenMenuBar = true;
-        
         jMenuItemMandelbrot.setSelected(true);
         jMenuColorSet1.setSelected(true);
-        
-        fPars.setDefaultParameters( null );
+
+        fPars.setDefaultParameters(null);
         fractalImage = new FractalMandelbrot(this, fPars);
-        fPars.setDefaultParameters( fractalImage );
-        fPars.setCurrentFractalType( 1 );
-        
+        fPars.setDefaultParameters(fractalImage);
+        fPars.setCurrentFractalType(1);
+
         // Java 1.5: fractalFrame.add(fractalImage);
         fractalFrame.getContentPane().add(fractalImage);
-        
+
         fractalFrame.pack();
         fractalFrame.setVisible(true);
-        
+
         // move the window/frame of the parameter panel to the right of the fractal frame
-        this.setLocation(fractalFrame.getWidth()+fractalFrame.getX(),0);
-        
-        fPars.setSizeX( fractalImage.getSize().width );
-        fPars.setSizeY( fractalImage.getSize().height );
-        
+        this.setLocation(fractalFrame.getWidth() + fractalFrame.getX(), 0);
+
+        fPars.setSizeX(fractalImage.getSize().width);
+        fPars.setSizeY(fractalImage.getSize().height);
+
         refreshInputFields();
-        
+
         // Set up a timer that calls repaint for the fractal image
-        timer = new Timer(100, this);
+        timer = new javax.swing.Timer(100, this);
         timer.setInitialDelay(0);
         timer.setCoalesce(true);
-        
+
         timer.start();
-        
+
         fractalImage.addMouseListener(this);
         fractalImage.addMouseMotionListener(this);
     }
-    
+
     public void actionPerformed(ActionEvent e) {
         // did the timer remind us to redisplay the image?
-        if( e.getSource() == timer ) {
+        if (e.getSource() == timer) {
             fractalImage.repaint();
-            
+
             // if the drawing is finished, also stop the timer, because we don't need it anymore
-            if( fractalImage.getFinishedDrawing() )
+            if (fractalImage.getFinishedDrawing()) {
                 timer.stop();
+            }
         }
-        
     }
-    
+
     public void mouseClicked(MouseEvent e) {
         // do nothing
     }
-    
+
     public void mouseEntered(MouseEvent e) {
         // do nothing
     }
-    
+
     public void mouseExited(MouseEvent e) {
         // do nothing
     }
-    
+
     public void mousePressed(MouseEvent e) {
         // do nothing
     }
-    
+
     public void mouseReleased(MouseEvent e) {
-        
+
         if (pointMouseDraggedStart == null) {
             // user did only click, but not drag => define fix point, do not zoom
             Point pointClicked = e.getPoint();
-            
-            fPars.setXFix( fPars.getXMin() +
-                    pointClicked.getX() * ((fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX() ) );
-            fPars.setYFix( fPars.getYMax() -
-                    pointClicked.getY() * ((fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY() ) );
-            
+
+            fPars.setXFix(fPars.getXMin() + pointClicked.getX() * ((fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX()));
+            fPars.setYFix(fPars.getYMax() - pointClicked.getY() * ((fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY()));
+
             fractalXFix.setText(Double.toString(fPars.getXFix()));
             fractalXFix.moveCaretPosition(0);
             fractalYFix.setText(Double.toString(fPars.getYFix()));
             fractalYFix.moveCaretPosition(0);
-            
+
             pointMouseDraggedStart = null;
             return;
         }
-        
+
         // user did dragging, so meant zooming in/out
         pointMouseDraggedEnd = e.getPoint();
-        
-        if( pointMouseDraggedStart.getX() > pointMouseDraggedEnd.getX()) {
+
+        if (pointMouseDraggedStart.getX() > pointMouseDraggedEnd.getX()) {
             int temp = pointMouseDraggedStart.x;
             pointMouseDraggedStart.x = pointMouseDraggedEnd.x;
             pointMouseDraggedEnd.x = temp;
         }
-        
-        if( pointMouseDraggedStart.getY() > pointMouseDraggedEnd.getY()) {
+
+        if (pointMouseDraggedStart.getY() > pointMouseDraggedEnd.getY()) {
             int temp = pointMouseDraggedStart.y;
             pointMouseDraggedStart.y = pointMouseDraggedEnd.y;
             pointMouseDraggedEnd.y = temp;
         }
-        
+
         // zoom completed: calculate new parameters after zoom
         Point start = pointMouseDraggedStart;
         Point end = pointMouseDraggedEnd;
-        
-        if( e.getButton() == MouseEvent.BUTTON1 ) {
-            System.out.println( this.getClass() + "zoom in" );
-            
-            double xMinNew = fPars.getXMin() + pointMouseDraggedStart.getX() * ( (fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX() );
-            fPars.setXMax( fPars.getXMax() - (fPars.getSizeX() - pointMouseDraggedEnd.getX()) * ( (fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX() ) );
-            double yMinNew = fPars.getYMax() - pointMouseDraggedEnd.getY() * ( (fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY() );
-            fPars.setYMax( fPars.getYMax() - pointMouseDraggedStart.getY() * ( (fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY() ) );
-            fPars.setXMin( xMinNew );
-            fPars.setYMin( yMinNew );
-        } else if ( e.getButton() == MouseEvent.BUTTON3 ) {
-            System.out.println( this.getClass() + "zoom out" );
-            
-            double xMinNew = fPars.getXMin() - pointMouseDraggedStart.getX() *
-                    ( (fPars.getXMax() - fPars.getXMin()) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX() ) );
-            fPars.setXMax( fPars.getXMax() + (fPars.getSizeX() - pointMouseDraggedEnd.getX()) *
-                    ( (fPars.getXMax() - fPars.getXMin()) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX() ) ) );
-            double yMinNew = fPars.getYMin() - ( fPars.getSizeY() - pointMouseDraggedEnd.getY()) *
-                    ( (fPars.getYMax() - fPars.getYMin()) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY() ) );
-            fPars.setYMax( fPars.getYMax() + pointMouseDraggedStart.getY() *
-                    ( (fPars.getYMax() - fPars.getYMin()) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY() ) ) );
-            fPars.setXMin( xMinNew );
-            fPars.setYMin(yMinNew );
+
+        if (e.getButton() == MouseEvent.BUTTON1) {
+            System.out.println(this.getClass() + "zoom in");
+
+            double xMinNew = fPars.getXMin() + pointMouseDraggedStart.getX() * ((fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX());
+            fPars.setXMax(fPars.getXMax() - (fPars.getSizeX() - pointMouseDraggedEnd.getX()) * ((fPars.getXMax() - fPars.getXMin()) / fPars.getSizeX()));
+            double yMinNew = fPars.getYMax() - pointMouseDraggedEnd.getY() * ((fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY());
+            fPars.setYMax(fPars.getYMax() - pointMouseDraggedStart.getY() * ((fPars.getYMax() - fPars.getYMin()) / fPars.getSizeY()));
+            fPars.setXMin(xMinNew);
+            fPars.setYMin(yMinNew);
+        } else if (e.getButton() == MouseEvent.BUTTON3) {
+            System.out.println(this.getClass() + "zoom out");
+
+            double xMinNew = fPars.getXMin() - pointMouseDraggedStart.getX() * ((fPars.getXMax() - fPars.getXMin()) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX()));
+            fPars.setXMax(fPars.getXMax() + (fPars.getSizeX() - pointMouseDraggedEnd.getX()) * ((fPars.getXMax() - fPars.getXMin()) / (pointMouseDraggedEnd.getX() - pointMouseDraggedStart.getX())));
+            double yMinNew = fPars.getYMin() - (fPars.getSizeY() - pointMouseDraggedEnd.getY()) * ((fPars.getYMax() - fPars.getYMin()) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY()));
+            fPars.setYMax(fPars.getYMax() + pointMouseDraggedStart.getY() * ((fPars.getYMax() - fPars.getYMin()) / (pointMouseDraggedEnd.getY() - pointMouseDraggedStart.getY())));
+            fPars.setXMin(xMinNew);
+            fPars.setYMin(yMinNew);
         }
-        
+
         // update input fields
         fractalXMin.setText(Double.toString(fPars.getXMin()));
         fractalXMin.moveCaretPosition(0);
@@ -277,39 +289,37 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalYMin.moveCaretPosition(0);
         fractalYMax.setText(Double.toString(fPars.getYMax()));
         fractalYMax.moveCaretPosition(0);
-        
+
         pointMouseDraggedStart = null;
-        
+
         // new in Version 1.1: repaint automatically after zooming
-        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint") );
-        
+        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint"));
     }
-    
+
     public void mouseMoved(MouseEvent e) {
         // do nothing
     }
-    
-    public void mouseDragged( MouseEvent e) {
+
+    public void mouseDragged(MouseEvent e) {
         //System.out.println( "mouseDragged " + e.getPoint() );
-        
-        if( pointMouseDraggedStart == null )
+        if (pointMouseDraggedStart == null) {
             pointMouseDraggedStart = e.getPoint();
-        
+        }
         // ask fractalImage to draw a new rectangle
-        fractalImage.setMouseDraggedRect( pointMouseDraggedStart, e.getPoint(), oldPointMouse );
+        fractalImage.setMouseDraggedRect(pointMouseDraggedStart, e.getPoint(), oldPointMouse);
         fractalImage.repaint();
-        
+
         oldPointMouse = e.getPoint();
     }
-    
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
      * always regenerated by the Form Editor.
      */
-    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+
         buttonGroupFractalType = new javax.swing.ButtonGroup();
         buttonGroupViewMenu = new javax.swing.ButtonGroup();
         jAboutDialog = new javax.swing.JDialog();
@@ -318,6 +328,26 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jScrollPane3 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
         buttonGroupColorSet = new javax.swing.ButtonGroup();
+        jPicasaUpload = new javax.swing.JDialog();
+        jPicasaUpload.setSize(new Dimension(600,450));
+        jLabel33 = new javax.swing.JLabel();
+        jLabel34 = new javax.swing.JLabel();
+        jGoogleEmail = new javax.swing.JTextField();
+        jLabel35 = new javax.swing.JLabel();
+        jGooglePassword = new javax.swing.JPasswordField();
+        jButtonConnect = new javax.swing.JButton();
+        jRememberLogon = new javax.swing.JCheckBox();
+        jComboBoxAlbums = new javax.swing.JComboBox();
+        jPanelPic1 = new javax.swing.JPanel();
+        jPanelPic2 = new javax.swing.JPanel();
+        jPanelPic3 = new javax.swing.JPanel();
+        jButtonPreviousPic = new javax.swing.JButton();
+        jButtonNextPic = new javax.swing.JButton();
+        jButtonUploadPicasa = new javax.swing.JButton();
+        jLabel36 = new javax.swing.JLabel();
+        jLabelAlbumSummary = new javax.swing.JLabel();
+        jLabelAlbumDetails = new javax.swing.JLabel();
+        jProgressBarConnect = new javax.swing.JProgressBar();
         sizeLabel = new javax.swing.JLabel();
         fractalSizeXLabel = new javax.swing.JLabel();
         fractalSizeX = new javax.swing.JTextField();
@@ -401,6 +431,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jMenuItemLoadParameters = new javax.swing.JMenuItem();
         jMenuItemSaveParametersAs = new javax.swing.JMenuItem();
         jMenuItemSaveImageAs = new javax.swing.JMenuItem();
+        jMenuItemSaveToPicasa = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         jMenuItemQuit = new javax.swing.JMenuItem();
         jMenuView = new javax.swing.JMenu();
@@ -426,12 +457,13 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jAboutDialog.setAlwaysOnTop(true);
         jAboutDialog.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jAboutDialog.setResizable(false);
+
         jLabel31.setFont(new java.awt.Font("Lucida Grande", 1, 18));
         jLabel31.setText("YaFGen, Version 1.1");
 
         jTextPane1.setEditable(false);
         jTextPane1.setFont(new java.awt.Font("Lucida Grande", 0, 10));
-        jTextPane1.setText("YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas\nCopyright (C) 2007  Roland Gr\u00f6pmair\n\nYaFGen is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or\n(at your option) any later version.\n\nYaFGen is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with YaFGen; if not, write to the Free Software\nFoundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n\nTo contact the author, please send an email to the following address: rgropmair@gmail.com");
+        jTextPane1.setText("YaFGen - Yet another Fractal Generator - Generate images based on mathematical formulas\nCopyright (C) 2007  Roland Gršpmair\n\nYaFGen is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or\n(at your option) any later version.\n\nYaFGen is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with YaFGen; if not, write to the Free Software\nFoundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n\nTo contact the author, please send an email to the following address: rgropmair@gmail.com");
         jTextPane1.setDragEnabled(false);
         jScrollPane3.setViewportView(jTextPane1);
 
@@ -455,22 +487,201 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .addContainerGap())
         );
 
+        jPicasaUpload.setName("PicasaUpload"); // NOI18N
+
+        jLabel33.setFont(new java.awt.Font("Lucida Grande", 1, 13));
+        jLabel33.setText("Google Account");
+
+        jLabel34.setText("Google Email");
+
+        jGoogleEmail.setText("rgropmair");
+
+        jLabel35.setText("Password");
+
+        jButtonConnect.setText("Connect");
+        jButtonConnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonConnectActionPerformed(evt);
+            }
+        });
+
+        jRememberLogon.setText("Remember Logon");
+
+        jComboBoxAlbums.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jPanelPic1.setMaximumSize(new java.awt.Dimension(100, 100));
+
+        org.jdesktop.layout.GroupLayout jPanelPic1Layout = new org.jdesktop.layout.GroupLayout(jPanelPic1);
+        jPanelPic1.setLayout(jPanelPic1Layout);
+        jPanelPic1Layout.setHorizontalGroup(
+            jPanelPic1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 161, Short.MAX_VALUE)
+        );
+        jPanelPic1Layout.setVerticalGroup(
+            jPanelPic1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 137, Short.MAX_VALUE)
+        );
+
+        org.jdesktop.layout.GroupLayout jPanelPic2Layout = new org.jdesktop.layout.GroupLayout(jPanelPic2);
+        jPanelPic2.setLayout(jPanelPic2Layout);
+        jPanelPic2Layout.setHorizontalGroup(
+            jPanelPic2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 162, Short.MAX_VALUE)
+        );
+        jPanelPic2Layout.setVerticalGroup(
+            jPanelPic2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 148, Short.MAX_VALUE)
+        );
+
+        org.jdesktop.layout.GroupLayout jPanelPic3Layout = new org.jdesktop.layout.GroupLayout(jPanelPic3);
+        jPanelPic3.setLayout(jPanelPic3Layout);
+        jPanelPic3Layout.setHorizontalGroup(
+            jPanelPic3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 170, Short.MAX_VALUE)
+        );
+        jPanelPic3Layout.setVerticalGroup(
+            jPanelPic3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 148, Short.MAX_VALUE)
+        );
+
+        jButtonPreviousPic.setText("Previous Pictures");
+
+        jButtonNextPic.setText("Next Pictures");
+
+        jButtonUploadPicasa.setText("Upload to Picasa");
+
+        jLabel36.setText("Album");
+
+        jLabelAlbumSummary.setText("Summary");
+
+        jLabelAlbumDetails.setText("Album Details");
+
+        org.jdesktop.layout.GroupLayout jPicasaUploadLayout = new org.jdesktop.layout.GroupLayout(jPicasaUpload.getContentPane());
+        jPicasaUpload.getContentPane().setLayout(jPicasaUploadLayout);
+        jPicasaUploadLayout.setHorizontalGroup(
+            jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jPicasaUploadLayout.createSequentialGroup()
+                .add(20, 20, 20)
+                .add(jLabel33)
+                .add(456, 456, 456))
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPicasaUploadLayout.createSequentialGroup()
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(jPanelPic1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(jPanelPic2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED))
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(20, 20, 20)
+                        .add(jButtonPreviousPic)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jButtonNextPic)
+                        .add(81, 81, 81)))
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(21, 21, 21)
+                        .add(jButtonUploadPicasa)
+                        .addContainerGap())
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jPicasaUploadLayout.createSequentialGroup()
+                        .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(jPanelPic3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(jPicasaUploadLayout.createSequentialGroup()
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jRememberLogon)
+                                    .add(jProgressBarConnect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .add(jLabelAlbumDetails))))
+                        .add(41, 41, 41))))
+            .add(jPicasaUploadLayout.createSequentialGroup()
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(20, 20, 20)
+                        .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(jLabel34)
+                            .add(jLabel35)))
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(jLabel36)))
+                .add(23, 23, 23)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(jGooglePassword, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .add(jGoogleEmail, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
+                        .add(28, 28, 28)
+                        .add(jButtonConnect)
+                        .add(16, 16, 16))
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(jComboBoxAlbums, 0, 236, Short.MAX_VALUE)
+                        .add(18, 18, 18)))
+                .add(203, 203, 203))
+            .add(jPicasaUploadLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(jLabelAlbumSummary, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 562, Short.MAX_VALUE))
+        );
+        jPicasaUploadLayout.setVerticalGroup(
+            jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jPicasaUploadLayout.createSequentialGroup()
+                .add(20, 20, 20)
+                .add(jLabel33)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(jLabel34)
+                    .add(jGoogleEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jRememberLogon))
+                .add(12, 12, 12)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(jLabel35)
+                        .add(jGooglePassword, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(jButtonConnect))
+                    .add(jProgressBarConnect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(jLabel36)
+                    .add(jComboBoxAlbums, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jLabelAlbumDetails))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jLabelAlbumSummary)
+                .add(12, 12, 12)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(jPanelPic3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(jPanelPic2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .add(jPanelPic1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(18, 18, 18)))
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(jButtonPreviousPic)
+                        .add(jButtonNextPic))
+                    .add(jPicasaUploadLayout.createSequentialGroup()
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jButtonUploadPicasa)))
+                .add(31, 31, 31))
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Input Parameters");
+
         sizeLabel.setText("Fractal Size");
 
         fractalSizeXLabel.setText("Size X");
-        fractalSizeXLabel.setName("InpPar123Label");
+        fractalSizeXLabel.setName("InpPar123Label"); // NOI18N
 
         fractalSizeX.setText("200");
-        fractalSizeX.setName("InpPar123SizeX");
+        fractalSizeX.setName("InpPar123SizeX"); // NOI18N
         fractalSizeX.setPreferredSize(new java.awt.Dimension(40, 22));
 
         fractalSizeYLabel.setText("Size Y");
-        fractalSizeYLabel.setName("InpPar123Label");
+        fractalSizeYLabel.setName("InpPar123Label"); // NOI18N
 
         fractalSizeY.setText("100");
-        fractalSizeY.setName("InpPar123SizeY");
+        fractalSizeY.setName("InpPar123SizeY"); // NOI18N
         fractalSizeY.setPreferredSize(new java.awt.Dimension(40, 22));
 
         setSizeButton1.setText("800x600");
@@ -497,41 +708,39 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         });
 
         jLabel6.setText("xfix");
-        jLabel6.setName("InpPar1Label");
+        jLabel6.setName("InpPar1Label"); // NOI18N
 
         fractalXFix.setText("jTextField1");
-        fractalXFix.setName("InpPar1XFix");
+        fractalXFix.setName("InpPar1XFix"); // NOI18N
         fractalXFix.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel7.setText("yfix");
-        jLabel7.setName("InpPar1Label");
+        jLabel7.setName("InpPar1Label"); // NOI18N
 
         fractalYFix.setText("jTextField1");
-        fractalYFix.setName("InpPar1YFix");
+        fractalYFix.setName("InpPar1YFix"); // NOI18N
         fractalYFix.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel8.setText("maxIter");
-        jLabel8.setName("InpPar1Label");
+        jLabel8.setName("InpPar1Label"); // NOI18N
 
         fractalMaxIter.setText("jTextField1");
-        fractalMaxIter.setName("InpPar1MaxIter");
+        fractalMaxIter.setName("InpPar1MaxIter"); // NOI18N
         fractalMaxIter.setPreferredSize(new java.awt.Dimension(60, 22));
 
         jLabel9.setText("maxLen");
-        jLabel9.setName("InpPar1Label");
+        jLabel9.setName("InpPar1Label"); // NOI18N
 
         fractalMaxLen.setText("jTextField1");
-        fractalMaxLen.setName("InpPar1MaxLen");
+        fractalMaxLen.setName("InpPar1MaxLen"); // NOI18N
         fractalMaxLen.setPreferredSize(new java.awt.Dimension(90, 22));
 
         buttonGroupFractalType.add(fractalTypeMandelbrot);
         fractalTypeMandelbrot.setText("Mandelbrot");
-        fractalTypeMandelbrot.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         fractalTypeMandelbrot.setMargin(new java.awt.Insets(0, 0, 0, 0));
 
         buttonGroupFractalType.add(fractalTypeJulia);
         fractalTypeJulia.setText("Julia");
-        fractalTypeJulia.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         fractalTypeJulia.setMargin(new java.awt.Insets(0, 0, 0, 0));
 
         setDefaultValuesMandelbrot.setText("Set Def. Values");
@@ -543,20 +752,19 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         });
 
         jLabel10.setFont(new java.awt.Font("Lucida Grande", 0, 10));
-        jLabel10.setText("z[n+1] := z[n]\u00b2 + c; z[0] := 0 ");
+        jLabel10.setText("z[n+1] := z[n]? + c; z[0] := 0 ");
 
         jLabel21.setFont(new java.awt.Font("Lucida Grande", 0, 10));
-        jLabel21.setText("z[n+1] := z[n]\u00b2 + c; z[0] := fix");
+        jLabel21.setText("z[n+1] := z[n]? + c; z[0] := fix");
 
         jLabel26.setText("fix for Julia:");
 
         buttonGroupFractalType.add(fractalTypeManowar);
         fractalTypeManowar.setText("Manowar");
-        fractalTypeManowar.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         fractalTypeManowar.setMargin(new java.awt.Insets(0, 0, 0, 0));
 
         jLabel32.setFont(new java.awt.Font("Lucida Grande", 0, 10));
-        jLabel32.setText("z[n+1] := z[n]\u00b2 + c; z[0] := fix");
+        jLabel32.setText("z[n+1] := z[n]? + c; z[0] := fix");
 
         org.jdesktop.layout.GroupLayout jPanelMandelJuliaLayout = new org.jdesktop.layout.GroupLayout(jPanelMandelJulia);
         jPanelMandelJulia.setLayout(jPanelMandelJuliaLayout);
@@ -623,7 +831,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(fractalTypeManowar)
                     .add(jLabel32, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 21, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 25, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 19, Short.MAX_VALUE)
                 .add(jLabel26)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
@@ -643,10 +851,13 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .add(setDefaultValuesMandelbrot)
                 .addContainerGap())
         );
+
         fractalType.addTab("Mandelbrot/Julia", jPanelMandelJulia);
 
         iterationFunctions.setToolTipText("");
+
         jPanelIFS.setToolTipText("Iterated Function System");
+
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -683,16 +894,16 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(setDefaultValuesIFS)
                 .addContainerGap(8, Short.MAX_VALUE))
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
             .add(jPanelIFSLayout.createSequentialGroup()
                 .addContainerGap()
                 .add(jLabel27)
-                .addContainerGap(129, Short.MAX_VALUE))
+                .addContainerGap(138, Short.MAX_VALUE))
         );
         jPanelIFSLayout.setVerticalGroup(
             jPanelIFSLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanelIFSLayout.createSequentialGroup()
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(10, Short.MAX_VALUE)
                 .add(jLabel27)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 114, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -701,35 +912,37 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                     .add(jLabel22)
                     .add(setDefaultValuesIFS)))
         );
+
         iterationFunctions.addTab("IFS", null, jPanelIFS, "");
 
         jPanelNLF.setToolTipText("Non-Linear Function");
+
         jLabel11.setText("xStart");
-        jLabel11.setName("InpPar1Label");
+        jLabel11.setName("InpPar1Label"); // NOI18N
 
         fractalXStart.setText("jTextField1");
-        fractalXStart.setName("InpPar1MaxLen");
+        fractalXStart.setName("InpPar1MaxLen"); // NOI18N
         fractalXStart.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel12.setText("yStart");
-        jLabel12.setName("InpPar1Label");
+        jLabel12.setName("InpPar1Label"); // NOI18N
 
         fractalYStart.setText("jTextField1");
-        fractalYStart.setName("InpPar1MaxLen");
+        fractalYStart.setName("InpPar1MaxLen"); // NOI18N
         fractalYStart.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel13.setText("a");
-        jLabel13.setName("InpPar1Label");
+        jLabel13.setName("InpPar1Label"); // NOI18N
 
         fractalB.setText("jTextField1");
-        fractalB.setName("InpPar1MaxLen");
+        fractalB.setName("InpPar1MaxLen"); // NOI18N
         fractalB.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel14.setText("b");
-        jLabel14.setName("InpPar1Label");
+        jLabel14.setName("InpPar1Label"); // NOI18N
 
         fractalA.setText("jTextField1");
-        fractalA.setName("InpPar1MaxLen");
+        fractalA.setName("InpPar1MaxLen"); // NOI18N
         fractalA.setPreferredSize(new java.awt.Dimension(90, 22));
 
         setDefaultValuesNLF.setText("Set Def. Values");
@@ -741,7 +954,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         });
 
         jLabel23.setText("Non-Linear Function");
-        jLabel23.getAccessibleContext().setAccessibleName("");
 
         jLabel30.setFont(new java.awt.Font("Lucida Grande", 0, 10));
         jLabel30.setText("x[0] = xStart;  y[0] = yStart");
@@ -814,33 +1026,36 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                     .add(setDefaultValuesNLF))
                 .add(13, 13, 13))
         );
+
+        jLabel23.getAccessibleContext().setAccessibleName("");
+
         iterationFunctions.addTab("NLF", null, jPanelNLF, "");
 
         jLabel15.setText("cFix");
-        jLabel15.setName("InpPar1Label");
+        jLabel15.setName("InpPar1Label"); // NOI18N
 
         fractalCJFix.setText("jTextField1");
-        fractalCJFix.setName("InpPar1MaxLen");
+        fractalCJFix.setName("InpPar1MaxLen"); // NOI18N
         fractalCJFix.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel18.setText("bFix");
-        jLabel18.setName("InpPar1Label");
+        jLabel18.setName("InpPar1Label"); // NOI18N
 
         fractalBJFix.setText("jTextField1");
-        fractalBJFix.setName("InpPar1MaxLen");
+        fractalBJFix.setName("InpPar1MaxLen"); // NOI18N
         fractalBJFix.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel19.setText("aFix");
-        jLabel19.setName("InpPar1Label");
+        jLabel19.setName("InpPar1Label"); // NOI18N
 
         fractalAJFix.setText("jTextField1");
-        fractalAJFix.setName("InpPar1MaxLen");
+        fractalAJFix.setName("InpPar1MaxLen"); // NOI18N
         fractalAJFix.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jumperPresets.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         jLabel20.setText("Set Def. Values");
-        jLabel20.setName("InpPar1Label");
+        jLabel20.setName("InpPar1Label"); // NOI18N
 
         jLabel24.setFont(new java.awt.Font("Lucida Grande", 0, 10));
         jLabel24.setText("x[n+1] = y[n] - sign(x[n]) * sqrt( abs( b*x[n] - c ) )");
@@ -899,24 +1114,24 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                     .add(jLabel20)
                     .add(jumperPresets, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
         );
+
         iterationFunctions.addTab("Jumper", jPanelJumper);
 
         jLabel16.setText("Sleep");
-        jLabel16.setName("InpPar1Label");
+        jLabel16.setName("InpPar1Label"); // NOI18N
 
         fractalSleep.setText("jTextField1");
-        fractalSleep.setName("InpPar1MaxLen");
+        fractalSleep.setName("InpPar1MaxLen"); // NOI18N
         fractalSleep.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel17.setText("Count");
-        jLabel17.setName("InpPar1Label");
+        jLabel17.setName("InpPar1Label"); // NOI18N
 
         fractalCount.setText("jTextField1");
-        fractalCount.setName("InpPar1MaxLen");
+        fractalCount.setName("InpPar1MaxLen"); // NOI18N
         fractalCount.setPreferredSize(new java.awt.Dimension(90, 22));
 
         checkBoxInfiniteLoop.setText("Infinte Loop");
-        checkBoxInfiniteLoop.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         checkBoxInfiniteLoop.setMargin(new java.awt.Insets(0, 0, 0, 0));
 
         buttonStopInfiniteLoop.setText("Stop Infinite Loop");
@@ -964,35 +1179,36 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 .add(iterationFunctions, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 225, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .add(50, 50, 50))
         );
+
         fractalType.addTab("Iteration Functions", jPanelIterationFunctions);
 
         jLabel2.setText("xmin");
-        jLabel2.setName("InpPar123Label");
+        jLabel2.setName("InpPar123Label"); // NOI18N
 
         fractalXMin.setText("jTextField1");
-        fractalXMin.setName("InpPar123XMin");
+        fractalXMin.setName("InpPar123XMin"); // NOI18N
         fractalXMin.setPreferredSize(new java.awt.Dimension(90, 22));
 
         fractalXMax.setText("jTextField1");
-        fractalXMax.setName("InpPar123XMax");
+        fractalXMax.setName("InpPar123XMax"); // NOI18N
         fractalXMax.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel3.setText("xmax");
-        jLabel3.setName("InpPar123Label");
+        jLabel3.setName("InpPar123Label"); // NOI18N
 
         jLabel5.setText("ymax");
-        jLabel5.setName("InpPar123Label");
+        jLabel5.setName("InpPar123Label"); // NOI18N
 
         fractalYMax.setText("jTextField1");
-        fractalYMax.setName("InpPar123YMax");
+        fractalYMax.setName("InpPar123YMax"); // NOI18N
         fractalYMax.setPreferredSize(new java.awt.Dimension(90, 22));
 
         fractalYMin.setText("jTextField1");
-        fractalYMin.setName("InpPar123YMin");
+        fractalYMin.setName("InpPar123YMin"); // NOI18N
         fractalYMin.setPreferredSize(new java.awt.Dimension(90, 22));
 
         jLabel4.setText("ymin");
-        jLabel4.setName("InpPar123Label");
+        jLabel4.setName("InpPar123Label"); // NOI18N
 
         jLabel1.setText("Area");
 
@@ -1006,6 +1222,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         jLabelCalculating.setText("Calculating and drawing ...");
 
         jMenuFile.setText("File");
+
         jMenuItemLoadParameters.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItemLoadParameters.setText("Load Parameters ...");
         jMenuItemLoadParameters.addActionListener(new java.awt.event.ActionListener() {
@@ -1013,7 +1230,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemLoadParametersActionPerformed(evt);
             }
         });
-
         jMenuFile.add(jMenuItemLoadParameters);
 
         jMenuItemSaveParametersAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
@@ -1023,7 +1239,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemSaveParametersAsActionPerformed(evt);
             }
         });
-
         jMenuFile.add(jMenuItemSaveParametersAs);
 
         jMenuItemSaveImageAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
@@ -1033,9 +1248,16 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemSaveImageAsActionPerformed(evt);
             }
         });
-
         jMenuFile.add(jMenuItemSaveImageAs);
 
+        jMenuItemSaveToPicasa.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItemSaveToPicasa.setText("Save to Picasa ...");
+        jMenuItemSaveToPicasa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSaveToPicasaActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemSaveToPicasa);
         jMenuFile.add(jSeparator1);
 
         jMenuItemQuit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
@@ -1045,19 +1267,18 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemQuitActionPerformed(evt);
             }
         });
-
         jMenuFile.add(jMenuItemQuit);
 
         jMenuBar.add(jMenuFile);
 
         jMenuView.setText("View");
+
         jMenuItemSetSize86.setText("Set Size to 800x600");
         jMenuItemSetSize86.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemSetSize86ActionPerformed(evt);
             }
         });
-
         jMenuView.add(jMenuItemSetSize86);
 
         jMenuItemSetSize17.setText("Set Size to 1024x768");
@@ -1066,12 +1287,12 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemSetSize17ActionPerformed(evt);
             }
         });
-
         jMenuView.add(jMenuItemSetSize17);
 
         jMenuBar.add(jMenuView);
 
         jMenuFractalType.setText("Fractal Type");
+
         jMenuItemMandelbrot.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_MASK));
         buttonGroupViewMenu.add(jMenuItemMandelbrot);
         jMenuItemMandelbrot.setText("Mandelbrot");
@@ -1080,7 +1301,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemMandelbrotActionPerformed(evt);
             }
         });
-
         jMenuFractalType.add(jMenuItemMandelbrot);
 
         jMenuItemJulia.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_MASK));
@@ -1091,7 +1311,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemJuliaActionPerformed(evt);
             }
         });
-
         jMenuFractalType.add(jMenuItemJulia);
 
         jMenuItemManowar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_MASK));
@@ -1102,9 +1321,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemManowarActionPerformed(evt);
             }
         });
-
         jMenuFractalType.add(jMenuItemManowar);
-
         jMenuFractalType.add(jSeparator2);
 
         jMenuItemIFS.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_2, java.awt.event.InputEvent.CTRL_MASK));
@@ -1115,7 +1332,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemIFSActionPerformed(evt);
             }
         });
-
         jMenuFractalType.add(jMenuItemIFS);
 
         jMenuItemNLF.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_3, java.awt.event.InputEvent.CTRL_MASK));
@@ -1126,7 +1342,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemNLFActionPerformed(evt);
             }
         });
-
         jMenuFractalType.add(jMenuItemNLF);
 
         jMenuItemJumper.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_4, java.awt.event.InputEvent.CTRL_MASK));
@@ -1137,12 +1352,12 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemJumperActionPerformed(evt);
             }
         });
-
         jMenuFractalType.add(jMenuItemJumper);
 
         jMenuBar.add(jMenuFractalType);
 
         jMenuOptions.setText("Options");
+
         buttonGroupColorSet.add(jMenuColorSet1);
         jMenuColorSet1.setText("Use Color Set 1");
         jMenuColorSet1.addActionListener(new java.awt.event.ActionListener() {
@@ -1150,7 +1365,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuColorSet1ActionPerformed(evt);
             }
         });
-
         jMenuOptions.add(jMenuColorSet1);
 
         buttonGroupColorSet.add(jMenuColorSet2);
@@ -1160,7 +1374,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuColorSet2ActionPerformed(evt);
             }
         });
-
         jMenuOptions.add(jMenuColorSet2);
 
         buttonGroupColorSet.add(jMenuColorSet3);
@@ -1170,7 +1383,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuColorSet3ActionPerformed(evt);
             }
         });
-
         jMenuOptions.add(jMenuColorSet3);
 
         buttonGroupColorSet.add(jMenuColorSet4);
@@ -1180,12 +1392,12 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuColorSet4ActionPerformed(evt);
             }
         });
-
         jMenuOptions.add(jMenuColorSet4);
 
         jMenuBar.add(jMenuOptions);
 
         jMenuHelp.setText("Help");
+
         jMenuItemAbout.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItemAbout.setText("About");
         jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
@@ -1193,7 +1405,6 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 jMenuItemAboutActionPerformed(evt);
             }
         });
-
         jMenuHelp.add(jMenuItemAbout);
 
         jMenuBar.add(jMenuHelp);
@@ -1308,32 +1519,32 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                     .add(jLabelCalculating))
                 .addContainerGap())
         );
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    
+
     private void jMenuItemManowarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemManowarActionPerformed
         fractalType.setSelectedComponent(jPanelMandelJulia);
         fractalTypeManowar.setSelected(true);
     }//GEN-LAST:event_jMenuItemManowarActionPerformed
-    
+
     private void jMenuItemJuliaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJuliaActionPerformed
         fractalType.setSelectedComponent(jPanelMandelJulia);
         fractalTypeJulia.setSelected(true);
     }//GEN-LAST:event_jMenuItemJuliaActionPerformed
-    
+
     /**
-     * 
-     * @param evt 
+     *
+     * @param evt
      */
     private void jMenuItemLoadParametersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadParametersActionPerformed
         String msg = "Load Fractal Parameters from File";
         FileDialog file = new FileDialog(this, msg, FileDialog.LOAD);
-        file.setFile("*.yafgen");  // set initial filename filter
+        file.setFile("*.yafgen"); // set initial filename filter
         // does not work file.setFilenameFilter(new MyFilenameFilter() );
         file.setDirectory(lastDir);
-        
+
         file.setVisible(true); // Blocks
-        
         String curFile;
         if ((curFile = file.getFile()) != null) {
             lastDir = file.getDirectory();
@@ -1342,129 +1553,115 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             byte[] data;
             // Remove trailing ".*.*" if present - signifies file does not exist
             if (filename.indexOf(".*.*") != -1) {
-                filename = filename.substring(0, filename.length()-4);
+                filename = filename.substring(0, filename.length() - 4);
             }
-            
+
             try {
-                
-                XMLDecoder e = new XMLDecoder(
-                        new BufferedInputStream(
-                        new FileInputStream(filename)));
-                fPars = (FractalParameters)e.readObject();
+
+                XMLDecoder e = new XMLDecoder(new BufferedInputStream(new FileInputStream(filename)));
+                fPars = (FractalParameters) e.readObject();
                 e.close();
-                
-            } catch ( IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        
-        switch( fPars.getCurrentFractalType() ) {
+
+        switch (fPars.getCurrentFractalType()) {
             case 1:
                 jMenuItemMandelbrot.setSelected(true);
                 fractalType.setSelectedIndex(0);
                 fractalTypeMandelbrot.setSelected(true);
                 refreshInputFields();
-                
+
                 break;
-                
             case 2:
                 jMenuItemJulia.setSelected(true);
                 fractalType.setSelectedIndex(0);
                 fractalTypeJulia.setSelected(true);
                 refreshInputFields();
-                
+
                 break;
-                
             case 3:
                 jMenuItemIFS.setSelected(true);
                 fractalType.setSelectedIndex(1);
                 iterationFunctions.setSelectedIndex(0);
                 refreshInputFields();
-                
+
                 break;
-                
             case 4:
                 jMenuItemNLF.setSelected(true);
                 fractalType.setSelectedIndex(1);
                 iterationFunctions.setSelectedIndex(1);
                 refreshInputFields();
-                
+
                 break;
-                
             case 5:
                 jMenuItemJumper.setSelected(true);
                 fractalType.setSelectedIndex(1);
                 iterationFunctions.setSelectedIndex(2);
                 refreshInputFields();
-                
+
                 break;
-                
             case 6:
                 jMenuItemManowar.setSelected(true);
                 fractalType.setSelectedIndex(0);
                 fractalTypeManowar.setSelected(true);
                 refreshInputFields();
-                
+
                 break;
-                
         }
-        
-        switch( fPars.getSelectedColorSet() ) {
+
+        switch (fPars.getSelectedColorSet()) {
             case 1:
                 jMenuColorSet1.setSelected(true);
                 break;
-                
             case 2:
                 jMenuColorSet2.setSelected(true);
                 break;
-                
             case 3:
                 jMenuColorSet3.setSelected(true);
                 break;
-                
             case 4:
                 jMenuColorSet4.setSelected(true);
                 break;
         }
-        
+
         // todo resize manually?
-        
     }//GEN-LAST:event_jMenuItemLoadParametersActionPerformed
-    
+
     private void jMenuItemSetSize17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSetSize17ActionPerformed
         setSizeButton17ActionPerformed(evt);
     }//GEN-LAST:event_jMenuItemSetSize17ActionPerformed
-    
+
     private void jMenuItemSetSize86ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSetSize86ActionPerformed
         setSizeButton86ActionPerformed(evt);
     }//GEN-LAST:event_jMenuItemSetSize86ActionPerformed
-    
+
     private void jMenuColorSet4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet4ActionPerformed
-        fPars.setSelectedColorSet( 4 );
+        fPars.setSelectedColorSet(4);
     }//GEN-LAST:event_jMenuColorSet4ActionPerformed
-    
+
     private void jMenuColorSet3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet3ActionPerformed
-        fPars.setSelectedColorSet( 3 );
+        fPars.setSelectedColorSet(3);
     }//GEN-LAST:event_jMenuColorSet3ActionPerformed
-    
+
     private void jMenuColorSet2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet2ActionPerformed
-        fPars.setSelectedColorSet( 2 );
+        fPars.setSelectedColorSet(2);
     }//GEN-LAST:event_jMenuColorSet2ActionPerformed
-    
+
     private void jMenuColorSet1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuColorSet1ActionPerformed
-        fPars.setSelectedColorSet( 1 );
+        fPars.setSelectedColorSet(1);
     }//GEN-LAST:event_jMenuColorSet1ActionPerformed
-    
+
     private void jMenuItemSaveParametersAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveParametersAsActionPerformed
-        
+
         String msg = "Save Fractal Parameters as File";
         FileDialog file = new FileDialog(this, msg, FileDialog.SAVE);
-        file.setFile("*.yafgen");  // set initial filename filter
+        file.setFile("*.yafgen"); // set initial filename filter
         file.setDirectory(lastDir);
-        
+
         // does not work file.setFilenameFilter(new MyFilenameFilter() );
         file.setVisible(true); // Blocks
-        
         String curFile;
         if ((curFile = file.getFile()) != null) {
             lastDir = file.getDirectory();
@@ -1473,69 +1670,61 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             byte[] data;
             // Remove trailing ".*.*" if present - signifies file does not exist
             if (filename.indexOf(".*.*") != -1) {
-                filename = filename.substring(0, filename.length()-4);
+                filename = filename.substring(0, filename.length() - 4);
             }
-            
+
             try {
-                XMLEncoder e = new XMLEncoder(
-                        new BufferedOutputStream(
-                        new FileOutputStream(filename)));
-                e.writeObject( fPars );
+                XMLEncoder e = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(filename)));
+                e.writeObject(fPars);
                 e.close();
-                
-            } catch ( IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }//GEN-LAST:event_jMenuItemSaveParametersAsActionPerformed
-    
+
     private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
         jAboutDialog.setVisible(true);
-        
-        
     }//GEN-LAST:event_jMenuItemAboutActionPerformed
-    
+
     private void jMenuItemIFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemIFSActionPerformed
         fractalType.setSelectedComponent(jPanelIterationFunctions);
         iterationFunctions.setSelectedComponent(jPanelIFS);
     }//GEN-LAST:event_jMenuItemIFSActionPerformed
-    
+
     private void jMenuItemJumperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJumperActionPerformed
         fractalType.setSelectedComponent(jPanelIterationFunctions);
         iterationFunctions.setSelectedComponent(jPanelJumper);
     }//GEN-LAST:event_jMenuItemJumperActionPerformed
-    
+
     private void jMenuItemMandelbrotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMandelbrotActionPerformed
         fractalType.setSelectedComponent(jPanelMandelJulia);
         fractalTypeMandelbrot.setSelected(true);
     }//GEN-LAST:event_jMenuItemMandelbrotActionPerformed
-    
+
     private void jMenuItemQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemQuitActionPerformed
         System.exit(0);
     }//GEN-LAST:event_jMenuItemQuitActionPerformed
-    
+
     private void jMenuItemNLFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemNLFActionPerformed
         fractalType.setSelectedComponent(jPanelIterationFunctions);
         iterationFunctions.setSelectedComponent(jPanelNLF);
     }//GEN-LAST:event_jMenuItemNLFActionPerformed
-    
+
     private void jMenuItemSaveImageAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveImageAsActionPerformed
         // make sure the paining process is complete
-        if( fractalImage.getFinishedDrawing() != true ) {
-            JOptionPane.showMessageDialog(this, "Drawing still in progress. " +
-                    "You cannot save the image, before drawing is finished or interrupted.",
-                    "Save Image - Error", JOptionPane.ERROR_MESSAGE);
+        if (fractalImage.getFinishedDrawing() != true) {
+            JOptionPane.showMessageDialog(this, "Drawing still in progress. " + "You cannot save the image, before drawing is finished or interrupted.", "Save Image - Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         String msg = "Save Fractal Image as File";
         FileDialog file = new FileDialog(this, msg, FileDialog.SAVE);
-        file.setFile("*.jpeg");  // set initial filename filter
+        file.setFile("*.jpeg"); // set initial filename filter
         file.setDirectory(lastDir);
-        
+
         // does not work file.setFilenameFilter(new MyFilenameFilter() );
         file.setVisible(true); // Blocks
-        
         String curFile;
         if ((curFile = file.getFile()) != null) {
             lastDir = file.getDirectory();
@@ -1544,215 +1733,307 @@ public class YaFGenMainFrame extends javax.swing.JFrame
             byte[] data;
             // Remove trailing ".*.*" if present - signifies file does not exist
             if (filename.indexOf(".*.*") != -1) {
-                filename = filename.substring(0, filename.length()-4);
+                filename = filename.substring(0, filename.length() - 4);
             }
-            
+
             File f = new File(filename);
             try {
                 f.createNewFile();
-                ImageIO.write(fractalImage.getBufferedImage(), "png", f );
-            } catch( IOException e ) {}
-            
+                ImageIO.write(fractalImage.getBufferedImage(), "png", f);
+            } catch (IOException e) {
+            }
         }
     }//GEN-LAST:event_jMenuItemSaveImageAsActionPerformed
-    
+
     private void setSizeManuallyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSizeManuallyActionPerformed
         // set window size to the enteres values
         try {
-            fPars.setSizeX( Integer.parseInt(fractalSizeX.getText()));
-            fPars.setSizeY( Integer.parseInt(fractalSizeY.getText()));
-            
-            setNewSize(fPars.getSizeX(),fPars.getSizeY());
-        } catch (NumberFormatException nfe) { }
+            fPars.setSizeX(Integer.parseInt(fractalSizeX.getText()));
+            fPars.setSizeY(Integer.parseInt(fractalSizeY.getText()));
+
+            setNewSize(fPars.getSizeX(), fPars.getSizeY());
+        } catch (NumberFormatException nfe) {
+        }
     }//GEN-LAST:event_setSizeManuallyActionPerformed
-    
+
     private void buttonStopInfiniteLoopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonStopInfiniteLoopActionPerformed
         // user pressed the stop button, so interrupt the infinite loop
         // we do this by just setting the flag; in the loop the flag is checked
         System.out.println("stop button pressed");
         fPars.setInfiniteLoopInterrupted(true);
     }//GEN-LAST:event_buttonStopInfiniteLoopActionPerformed
-    
+
     private void setDefaultValuesIFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setDefaultValuesIFSActionPerformed
-        fPars.setDefaultParameters(new FractalIFS(this, fPars) );
+        fPars.setDefaultParameters(new FractalIFS(this, fPars));
         refreshInputFields();
     }//GEN-LAST:event_setDefaultValuesIFSActionPerformed
-    
+
     private void setDefaultValuesMandelbrotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setDefaultValuesMandelbrotActionPerformed
-        fPars.setDefaultParameters(new FractalMandelbrot(this, fPars) );
+        fPars.setDefaultParameters(new FractalMandelbrot(this, fPars));
         refreshInputFields();
     }//GEN-LAST:event_setDefaultValuesMandelbrotActionPerformed
-    
+
     private void setDefaultValuesNLFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setDefaultValuesNLFActionPerformed
-        fPars.setDefaultParameters(new FractalNLF(this, fPars) );
+        fPars.setDefaultParameters(new FractalNLF(this, fPars));
         refreshInputFields();
     }//GEN-LAST:event_setDefaultValuesNLFActionPerformed
-    
-    private void setNewSize( int x, int y) {
+
+    private void setNewSize(int x, int y) {
         fPars.setSizeX(x);
         fPars.setSizeY(y);
         fractalSizeX.setText(Integer.toString(fPars.getSizeX()));
         fractalSizeY.setText(Integer.toString(fPars.getSizeY()));
-        
+
         // because we set a new size of the image, we need to interrupt the worker
         fractalImage.interruptWorker();
         // wait?
-        
-        fractalImage.setSize(x,y);
+        fractalImage.setSize(x, y);
     }
-    
+
     private void setSizeButton17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSizeButton17ActionPerformed
         // set window size to 1024x768
-        setNewSize(1024,768);
-        
+        setNewSize(1024, 768);
+
         // new in Version 1.1: repaint automatically after setting new size
-        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint") );
+        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint"));
     }//GEN-LAST:event_setSizeButton17ActionPerformed
-    
+
     private void setSizeButton86ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSizeButton86ActionPerformed
         // set window size to 800x600
-        setNewSize(800,600);
-        
+        setNewSize(800, 600);
+
         // new in Version 1.1: repaint automatically after setting new size
-        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint") );
+        this.repaintButtonActionPerformed(new ActionEvent(this, 1, "Repaint"));
     }//GEN-LAST:event_setSizeButton86ActionPerformed
-    
+
     /** the user pressed the repaint button, or he hit the enter key (default action)
      * so we need to repaint the entire image, based on the (maybe) new parameters
      */
     private void repaintButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_repaintButtonActionPerformed
-        if( evt.getActionCommand() == "Repaint" ) {
-            
+        if (evt.getActionCommand().equals("Repaint")) {
+            //todo does equals work?
             oldPointMouse = null;
-            
+
             // if the user resized the image window manually, get the new size now.
             // check if the fractalImage was really added to the container
             // note: it was not added, if there was an input error (see below)
-            if( fractalImage.getSize().width != 0 ) {
-                fPars.setSizeX( fractalImage.getSize().width );
-                fPars.setSizeY( fractalImage.getSize().height );
+            if (fractalImage.getSize().width != 0) {
+                fPars.setSizeX(fractalImage.getSize().width);
+                fPars.setSizeY(fractalImage.getSize().height);
                 fractalSizeX.setText(Integer.toString(fPars.getSizeX()));
                 fractalSizeY.setText(Integer.toString(fPars.getSizeY()));
             }
-            
+
             FractalImage oldFractalImage = fractalImage;
-            
+
             // interrupt the worker; we will start a new one!
             fractalImage.interruptWorker();
-            
+
             fractalImage = null;
-            
+
             fPars.setInfiniteLoopInterrupted(false);
-            
-            
+
+
             // find out what fractal type is selected
-            switch( fractalType.getSelectedIndex()) {
+            switch (fractalType.getSelectedIndex()) {
                 case 0:
                     // Mandelbrot or Julia, or Manowar
-                    if(fractalTypeMandelbrot.isSelected()) {
+                    if (fractalTypeMandelbrot.isSelected()) {
                         fractalImage = new FractalMandelbrot(this, fPars);
-                        fPars.setCurrentFractalType( 1 );  // Mandel
+                        fPars.setCurrentFractalType(1); // Mandel
                         jMenuItemMandelbrot.setSelected(true);
-                    } else if(fractalTypeJulia.isSelected()) {
+                    } else if (fractalTypeJulia.isSelected()) {
                         fractalImage = new FractalJulia(this, fPars);
-                        fPars.setCurrentFractalType( 2 );  // Julia
+                        fPars.setCurrentFractalType(2); // Julia
                         jMenuItemJulia.setSelected(true);
                     } else {
                         fractalImage = new FractalManowar(this, fPars);
-                        fPars.setCurrentFractalType( 6 );  // Manowar
+                        fPars.setCurrentFractalType(6); // Manowar
                         jMenuItemManowar.setSelected(true);
                     }
                     break;
-                    
                 case 1:
                     // Iteration Function
-                    switch( iterationFunctions.getSelectedIndex()) {
+                    switch (iterationFunctions.getSelectedIndex()) {
                         case 0:
                             // IFS
                             fractalImage = new FractalIFS(this, fPars);
-                            fPars.setCurrentFractalType( 3 );
+                            fPars.setCurrentFractalType(3);
                             jMenuItemIFS.setSelected(true);
                             break;
-                            
                         case 1:
                             // NLF
                             fractalImage = new FractalNLF(this, fPars);
-                            fPars.setCurrentFractalType( 4 );
+                            fPars.setCurrentFractalType(4);
                             jMenuItemNLF.setSelected(true);
                             break;
-                            
                         case 2:
                             // Jumper
                             fractalImage = new FractalJumper(this, fPars);
-                            fPars.setCurrentFractalType( 5 );
+                            fPars.setCurrentFractalType(5);
                             jMenuItemJumper.setSelected(true);
                             break;
                     }
                     break;
-                    
             }
-            
+
             boolean inputOK = true;
-            
+
             try {
                 refreshFractalParameters();
             } catch (NumberFormatException nfe) {
                 Toolkit.getDefaultToolkit().beep();
                 inputOK = false;
             }
-            
-            
-            if( inputOK == true ) {
+
+
+            if (inputOK == true) {
                 // only remove/add new fractalImage, if there is no input error; otherwise it will repaint anyway!
                 // remove the "old" fractal from the container - because a new one will be created
                 fractalFrame.getContentPane().remove(oldFractalImage);
                 fractalFrame.getContentPane().add(fractalImage);
                 fractalImage.addMouseListener(this);
                 fractalImage.addMouseMotionListener(this);
-                
+
                 fractalFrame.pack();
-                
+
                 timer.start();
-                
+
                 // not needed - because of .add?
                 //fractalImage.repaint(true);
             }
-            
         }
     }//GEN-LAST:event_repaintButtonActionPerformed
-    
+
+    private void jMenuItemSaveToPicasaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveToPicasaActionPerformed
+
+        jPicasaUpload.setVisible(true);
+
+        myImage1 = null;
+        myImage2 = null;
+        myImage3 = null;
+        
+        MyPhotoPanel1 myPhotoPanel1 = new MyPhotoPanel1();
+        MyPhotoPanel2 myPhotoPanel2 = new MyPhotoPanel2();
+        MyPhotoPanel3 myPhotoPanel3 = new MyPhotoPanel3();                
+        jPanelPic1.add(myPhotoPanel1, 0);
+        jPanelPic2.add(myPhotoPanel2, 0);
+        jPanelPic3.add(myPhotoPanel3, 0);        
+        
+        this.pack();
+        myPhotoPanel1.setVisible(true);
+        myPhotoPanel2.setVisible(true);
+        myPhotoPanel3.setVisible(true);
+}//GEN-LAST:event_jMenuItemSaveToPicasaActionPerformed
+
+    private void jButtonConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConnectActionPerformed
+
+        java.util.List<AlbumEntry> myAlbumEntries;
+        java.util.List<String> myAlbumNames = new ArrayList<String>();
+
+        picasaLogon = jGoogleEmail.getText();
+        picasaPassword = jGooglePassword.getPassword().toString();
+        // todo check logon and password, only valid characters allowed!
+        // todo checkbox remember
+        try {
+            // build URL to access all specific user's albums
+            // todo auch die privaten?
+            URL albumsUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + picasaLogon + "?kind=album");
+
+            PicasawebService myService = new PicasawebService(picasaWebserviceId);
+
+            jProgressBarConnect.setIndeterminate(true);
+            jProgressBarConnect.setMaximum(10);
+            jProgressBarConnect.setValue(1);
+            //myService.setUserCredentials(picasaLogon, picasaPassword);
+            // Send the request to get the albums
+            com.google.gdata.data.photos.UserFeed myUserFeed = myService.getFeed(albumsUrl, com.google.gdata.data.photos.UserFeed.class);
+
+            // returncode?
+            jProgressBarConnect.setValue(2);
+            myAlbumEntries = myUserFeed.getAlbumEntries();
+            for (AlbumEntry myAlbumEntry : myAlbumEntries) {
+                String title = myAlbumEntry.getTitle().getPlainText();
+                System.out.println(title);
+                myAlbumNames.add(title);
+            }
+            //todo - check!
+            jComboBoxAlbums.setModel(new MyComboBoxModelAlbums(myAlbumNames, myAlbumEntries));
+
+            jProgressBarConnect.setValue(5);
+
+            int photoCounter = 0;
+
+            try {
+                // get photo of first album
+                String albumName = myAlbumEntries.get(0).getName();
+                URL photosInAlbumUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + picasaLogon + "/album/" + albumName); // + "?kind=photo");
+                //PhotoFeed myPhotoFeed = myService.getFeed(photosInAlbumUrl, PhotoFeed.class);
+                AlbumFeed myAlbumFeed = myService.getFeed(photosInAlbumUrl, AlbumFeed.class);
+                java.util.List<PhotoEntry> myPhotoList = myAlbumFeed.getPhotoEntries();
+                // todo if only less than 3 pics?
+                java.util.List<MediaThumbnail> myThumbnails = myPhotoList.get(0).getMediaGroup().getThumbnails();
+                URL imageUrl = new URL(myThumbnails.get(0).getUrl());
+                Image myThumbImage = ImageIO.read(imageUrl);
+                myImage1 = myThumbImage.getScaledInstance(jPanelPic1.getWidth(), jPanelPic1.getHeight(), Image.SCALE_FAST);
+                myThumbnails = myPhotoList.get(1).getMediaGroup().getThumbnails();
+                imageUrl = new URL(myThumbnails.get(0).getUrl());
+                myThumbImage = ImageIO.read(imageUrl);
+                myImage2 = myThumbImage.getScaledInstance(jPanelPic1.getWidth(), jPanelPic1.getHeight(), Image.SCALE_FAST);
+                myThumbnails = myPhotoList.get(2).getMediaGroup().getThumbnails();
+                imageUrl = new URL(myThumbnails.get(0).getUrl());
+                myThumbImage = ImageIO.read(imageUrl);
+                myImage3 = myThumbImage.getScaledInstance(jPanelPic1.getWidth(), jPanelPic1.getHeight(), Image.SCALE_FAST);
+
+                // repaint the frame, so we can see the photo (see class myPhoto)
+                jPicasaUpload.repaint();
+
+                System.out.println("Album Name: " + myAlbumEntries.get(0).getName() + "\nPic Number: " 
+                        + photoCounter + "\nId: " + myPhotoList.get(0).getId() + "\n" + "Height: " 
+                        + myPhotoList.get(0).getHeight() + ", Width: " + myPhotoList.get(0).getWidth());
+            } catch (MalformedURLException e) {
+            } catch (IOException e) {
+            } catch (ServiceException e) {
+            }
+        } catch (java.io.IOException ioe) {
+            System.out.println("IOException" + ioe.getMessage());
+        } catch (ServiceException se) {
+            System.out.println("ServiceException" + se.getMessage());
+        }
+}//GEN-LAST:event_jButtonConnectActionPerformed
+
     /** read all the parameters from the input fields in the GUI */
     private void refreshFractalParameters() {
         fPars.setSizeX(Integer.parseInt(fractalSizeX.getText()));
         fPars.setSizeY(Integer.parseInt(fractalSizeY.getText()));
-        
-        fPars.setMaxLength( Double.parseDouble(fractalMaxLen.getText()));
-        fPars.setMaxIterations( Integer.parseInt(fractalMaxIter.getText()));
-        fPars.setXFix( Double.parseDouble(fractalXFix.getText()));
-        fPars.setYFix( Double.parseDouble(fractalYFix.getText()));
-        fPars.setXMin( Double.parseDouble(fractalXMin.getText()));
-        fPars.setXMax( Double.parseDouble(fractalXMax.getText()));
-        fPars.setYMin( Double.parseDouble(fractalYMin.getText()));
-        fPars.setYMax( Double.parseDouble(fractalYMax.getText()));
-        
-        fPars.setXStart( Double.parseDouble(fractalXStart.getText()));
-        fPars.setYStart( Double.parseDouble(fractalYStart.getText()));
-        fPars.setAFix( Double.parseDouble(fractalA.getText()));
-        fPars.setBFix( Double.parseDouble(fractalB.getText()));
-        fPars.setSleep( Integer.parseInt(fractalSleep.getText()));
-        fPars.setCount( Long.parseLong(fractalCount.getText()));
-        fPars.setInfiniteLoop( checkBoxInfiniteLoop.isSelected());
-        
-        fPars.setAJFix( Double.parseDouble(fractalAJFix.getText()));
-        fPars.setBJFix( Double.parseDouble(fractalBJFix.getText()));
-        fPars.setCJFix( Double.parseDouble(fractalCJFix.getText()));
+
+        fPars.setMaxLength(Double.parseDouble(fractalMaxLen.getText()));
+        fPars.setMaxIterations(Integer.parseInt(fractalMaxIter.getText()));
+        fPars.setXFix(Double.parseDouble(fractalXFix.getText()));
+        fPars.setYFix(Double.parseDouble(fractalYFix.getText()));
+        fPars.setXMin(Double.parseDouble(fractalXMin.getText()));
+        fPars.setXMax(Double.parseDouble(fractalXMax.getText()));
+        fPars.setYMin(Double.parseDouble(fractalYMin.getText()));
+        fPars.setYMax(Double.parseDouble(fractalYMax.getText()));
+
+        fPars.setXStart(Double.parseDouble(fractalXStart.getText()));
+        fPars.setYStart(Double.parseDouble(fractalYStart.getText()));
+        fPars.setAFix(Double.parseDouble(fractalA.getText()));
+        fPars.setBFix(Double.parseDouble(fractalB.getText()));
+        fPars.setSleep(Integer.parseInt(fractalSleep.getText()));
+        fPars.setCount(Long.parseLong(fractalCount.getText()));
+        fPars.setInfiniteLoop(checkBoxInfiniteLoop.isSelected());
+
+        fPars.setAJFix(Double.parseDouble(fractalAJFix.getText()));
+        fPars.setBJFix(Double.parseDouble(fractalBJFix.getText()));
+        fPars.setCJFix(Double.parseDouble(fractalCJFix.getText()));
     }
-    
+
     /** write all the parameters to the GUI */
     private void refreshInputFields() {
         fractalSizeX.setText(Integer.toString(fPars.getSizeX()));
         fractalSizeY.setText(Integer.toString(fPars.getSizeY()));
-        
+
         fractalXMin.setText(Double.toString(fPars.getXMin()));
         fractalXMin.moveCaretPosition(0);
         fractalXMax.setText(Double.toString(fPars.getXMax()));
@@ -1769,7 +2050,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalMaxLen.moveCaretPosition(0);
         fractalMaxIter.setText(Integer.toString(fPars.getMaxIterations()));
         fractalMaxIter.moveCaretPosition(0);
-        
+
         fractalXStart.setText(Double.toString(fPars.getXStart()));
         fractalXStart.moveCaretPosition(0);
         fractalYStart.setText(Double.toString(fPars.getYStart()));
@@ -1781,28 +2062,28 @@ public class YaFGenMainFrame extends javax.swing.JFrame
         fractalSleep.setText(Integer.toString(fPars.getSleep()));
         fractalCount.setText(Long.toString(fPars.getCount()));
         checkBoxInfiniteLoop.setSelected(fPars.isInfiniteLoop());
-        
+
         fractalAJFix.setText(Double.toString(fPars.getAJFix()));
         fractalAJFix.moveCaretPosition(0);
         fractalBJFix.setText(Double.toString(fPars.getBJFix()));
         fractalBJFix.moveCaretPosition(0);
         fractalCJFix.setText(Double.toString(fPars.getCJFix()));
         fractalCJFix.moveCaretPosition(0);
-        
+
         tableIFS.repaint();
     }
-    
+
     /**
      * main method
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 new YaFGenMainFrame().setVisible(true);
             }
         });
     }
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupColorSet;
     private javax.swing.ButtonGroup buttonGroupFractalType;
@@ -1836,6 +2117,13 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JTextField fractalYStart;
     private javax.swing.JTabbedPane iterationFunctions;
     private javax.swing.JDialog jAboutDialog;
+    private javax.swing.JButton jButtonConnect;
+    private javax.swing.JButton jButtonNextPic;
+    private javax.swing.JButton jButtonPreviousPic;
+    private javax.swing.JButton jButtonUploadPicasa;
+    private javax.swing.JComboBox jComboBoxAlbums;
+    private javax.swing.JTextField jGoogleEmail;
+    private javax.swing.JPasswordField jGooglePassword;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1862,12 +2150,18 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabelAlbumDetails;
+    private javax.swing.JLabel jLabelAlbumSummary;
     private javax.swing.JLabel jLabelCalculating;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JRadioButtonMenuItem jMenuColorSet1;
@@ -1888,6 +2182,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JMenuItem jMenuItemQuit;
     private javax.swing.JMenuItem jMenuItemSaveImageAs;
     private javax.swing.JMenuItem jMenuItemSaveParametersAs;
+    private javax.swing.JMenuItem jMenuItemSaveToPicasa;
     private javax.swing.JMenuItem jMenuItemSetSize17;
     private javax.swing.JMenuItem jMenuItemSetSize86;
     private javax.swing.JMenu jMenuOptions;
@@ -1897,6 +2192,12 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JPanel jPanelJumper;
     private javax.swing.JPanel jPanelMandelJulia;
     private javax.swing.JPanel jPanelNLF;
+    private javax.swing.JPanel jPanelPic1;
+    private javax.swing.JPanel jPanelPic2;
+    private javax.swing.JPanel jPanelPic3;
+    private javax.swing.JDialog jPicasaUpload;
+    private javax.swing.JProgressBar jProgressBarConnect;
+    private javax.swing.JCheckBox jRememberLogon;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
@@ -1915,133 +2216,130 @@ public class YaFGenMainFrame extends javax.swing.JFrame
     private javax.swing.JButton setSizeManually;
     private javax.swing.JLabel sizeLabel;
     // End of variables declaration//GEN-END:variables
-    
+
     class MyTableModel extends AbstractTableModel {
-        private String[] columnNames = { "a", "b", "c", "d", "e", "f" };
-        
+
+        private String[] columnNames = {"a", "b", "c", "d", "e", "f"};
+
         public int getColumnCount() {
             return columnNames.length;
         }
-        
+
         public int getRowCount() {
             return 6;
         }
-        
+
+        @Override
         public String getColumnName(int col) {
             return columnNames[col];
         }
-        
+
         public Object getValueAt(int row, int col) {
             switch (col) {
                 case 0:
                     return new Double(fPars.getA().get(row).toString());
-                    
                 case 1:
                     return new Double(fPars.getB().get(row).toString());
-                    
                 case 2:
                     return new Double(fPars.getC().get(row).toString());
-                    
                 case 3:
                     return new Double(fPars.getD().get(row).toString());
-                    
                 case 4:
                     return new Double(fPars.getE().get(row).toString());
-                    
                 case 5:
                     return new Double(fPars.getF().get(row).toString());
             }
-            return (String)"Dummy";
+            return "Dummy";
         }
-        
+
+        @Override
         public Class getColumnClass(int c) {
             return new Double(1.0).getClass();
         }
-        
+
+        @Override
         public boolean isCellEditable(int row, int col) {
             return true;
         }
-        
+
+        @Override
         public void setValueAt(Object value, int row, int col) {
-            double val = ((Double)value).doubleValue();
-            
+            double val = ((Double) value).doubleValue();
+
             switch (col) {
                 case 0:
-                    fPars.a.set(row,val);
+                    fPars.a.set(row, val);
                     break;
-                    
                 case 1:
-                    fPars.b.set(row,val);
+                    fPars.b.set(row, val);
                     break;
-                    
                 case 2:
-                    fPars.c.set(row,val);
+                    fPars.c.set(row, val);
                     break;
-                    
                 case 3:
-                    fPars.d.set(row,val);
+                    fPars.d.set(row, val);
                     break;
-                    
                 case 4:
-                    fPars.e.set(row,val);
+                    fPars.e.set(row, val);
                     break;
-                    
                 case 5:
-                    fPars.f.set(row,val);
+                    fPars.f.set(row, val);
                     break;
             }
             fireTableCellUpdated(row, col);
         }
     }
-    
+
     class MyComboBoxModel implements ComboBoxModel {
-        private String[] presetNames = { "Tubes Symmetric", "Carpet Tiled",
-        "Carpet Endless", "Raindrops from Right", "Flower 1", "Insect",
-        "Stem 1", "Stem 2" };
-        
+
+        private String[] presetNames = {"Tubes Symmetric", "Carpet Tiled", "Carpet Endless", "Raindrops from Right", "Flower 1", "Insect", "Stem 1", "Stem 2"};
         Object selectedItem = presetNames[0];
-        
+
         public int getSize() {
             return presetNames.length;
         }
-        
+
         public Object getElementAt(int index) {
             return presetNames[index];
         }
-        
+
         public Object getSelectedItem() {
             return selectedItem;
         }
-        
+
         public void setSelectedItem(Object anItem) {
             // another item in the combo box was selected
             selectedItem = anItem;
-            
+
             // set the default parameters for this new type
-            fPars.setDefaultParameters(new FractalJumper(YaFGenMainFrame.this, fPars) );
+            fPars.setDefaultParameters(new FractalJumper(YaFGenMainFrame.this, fPars));
             // and now set the specific presets
-            fPars.setPresetParameters( jumperPresets.getSelectedIndex() );
+            fPars.setPresetParameters(jumperPresets.getSelectedIndex());
             // and refresh the fields on the screen
             refreshInputFields();
         }
-        
-        public void removeListDataListener(ListDataListener l) { }
-        public void addListDataListener(ListDataListener l) { }
-        
-    };
-    
-    
+
+        public void removeListDataListener(ListDataListener l) {
+        }
+
+        public void addListDataListener(ListDataListener l) {
+        }
+    }
+    {
+    }
+
     class MyDoubleVerifier extends InputVerifier implements ActionListener {
-        
+
         public void actionPerformed(ActionEvent e) {
-            JTextField source = (JTextField)e.getSource();
+            JTextField source = (JTextField) e.getSource();
             shouldYieldFocus(source); //ignore return value
             source.selectAll();
         }
-        
+
+        @Override
         public boolean shouldYieldFocus(JComponent input) {
             boolean inputOK = verify(input);
-            
+
             if (inputOK) {
                 return true;
             } else {
@@ -2049,31 +2347,32 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 return false;
             }
         }
-        
+
         //This method checks input, but should cause no side effects (e.g. no beeping)
         public boolean verify(JComponent input) {
             boolean wasValid = true;
-            
+
             try {
-                double amount = Double.parseDouble( ((JTextField)input).getText() );
+                double amount = Double.parseDouble(((JTextField) input).getText());
             } catch (NumberFormatException nfe) {
                 wasValid = false;
             }
             return wasValid;
         }
-        
     }
+
     class MyIntegerVerifier extends InputVerifier implements ActionListener {
-        
+
         public void actionPerformed(ActionEvent e) {
             //JTextField source = (JTextField)e.getSource();
             //shouldYieldFocus(source); //ignore return value
             //source.selectAll();
         }
-        
+
+        @Override
         public boolean shouldYieldFocus(JComponent input) {
             boolean inputOK = verify(input);
-            
+
             if (inputOK) {
                 return true;
             } else {
@@ -2081,26 +2380,119 @@ public class YaFGenMainFrame extends javax.swing.JFrame
                 return false;
             }
         }
-        
+
         //This method checks input
         public boolean verify(JComponent input) {
             boolean wasValid = true;
-            
+
             try {
-                double amount = Integer.parseInt( ((JTextField)input).getText() );
+                double amount = Integer.parseInt(((JTextField) input).getText());
             } catch (NumberFormatException nfe) {
                 wasValid = false;
             }
             return wasValid;
         }
-        
     }
-    
+
     /**
      * hide or show the text that indicates that calculation is still running
-     * @param flag 
+     * @param flag
      */
-    public void setCalculatingLabel( boolean flag ) {
-        jLabelCalculating.setVisible( flag );
+    public void setCalculatingLabel(boolean flag) {
+        jLabelCalculating.setVisible(flag);
+    }
+
+    class MyComboBoxModelAlbums implements ComboBoxModel {
+
+        private Object selectedItem;
+        java.util.List<AlbumEntry> myAlbumEntries;
+        java.util.List<String> myAlbumNames;
+
+        MyComboBoxModelAlbums(java.util.List<String> albumNames, java.util.List<AlbumEntry> albumEntries) {
+            myAlbumNames = albumNames;
+            selectedItem = myAlbumNames.get(0);
+            myAlbumEntries = albumEntries;
+        }
+
+        public int getSize() {
+            return myAlbumEntries.size();
+        }
+
+        public Object getElementAt(int index) {
+            return myAlbumNames.get(index);
+        }
+
+        public Object getSelectedItem() {
+            return selectedItem;
+        }
+
+        public void setSelectedItem(Object anItem) {
+            // another item in the combo box was selected
+            selectedItem = anItem;
+
+            // change labels to show album summary and details
+            String summary = myAlbumEntries.get(jComboBoxAlbums.getSelectedIndex()).getSummary().getPlainText();
+            String details = myAlbumEntries.get(jComboBoxAlbums.getSelectedIndex()).getPublished().toString();
+            jLabelAlbumDetails.setText(details);
+            jLabelAlbumSummary.setText(summary);
+
+            // load thumbnails of this album, and display them
+            jProgressBarConnect.setValue(7);
+
+            jProgressBarConnect.setValue(8);
+            jProgressBarConnect.setValue(9);
+        }
+
+        public void removeListDataListener(ListDataListener l) {
+        }
+
+        public void addListDataListener(ListDataListener l) {
+        }
+    }
+    
+    private class MyPhotoPanel1 extends JPanel {
+
+        MyPhotoPanel1() {
+            super();
+            this.setSize(1600, 1200);
+        }
+    
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            if (myImage1 != null) {
+                g.drawImage(myImage1, 0, 0, null);
+            }
+        }
+    }
+     private class MyPhotoPanel2 extends JPanel {
+
+        MyPhotoPanel2() {
+            super();
+            this.setSize(1600, 1200);
+        }
+    
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            if (myImage2 != null) {
+                g.drawImage(myImage2, 0, 0, null);
+            }
+        }
+    }
+      private class MyPhotoPanel3 extends JPanel {
+
+        MyPhotoPanel3() {
+            super();
+            this.setSize(1600, 1200);
+        }
+    
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            if (myImage3 != null) {
+                g.drawImage(myImage3, 0, 0, null);
+            }
+        }
     }
 }
