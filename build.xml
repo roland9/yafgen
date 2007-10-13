@@ -5,9 +5,12 @@
 <project name="YAFG" default="default" basedir=".">
     <description>Builds, tests, and runs the project YAFG.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    <import file="nbproject/profiler-build-impl.xml"/>
+    
+    <!--
 
-    <import file="nbproject/profiler-build-impl.xml"/>    <!--
-
+    
     There exist several targets which are by default empty and which can be 
     used for execution of your tasks. These targets are usually executed 
     before and after some main targets. They are: 
@@ -67,4 +70,29 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <!-- new rolandg, 28.07.2997  -->
+    
+    <target name="-post-jar">
+        <jar update="true" destfile="${dist.jar}">
+            <zipfileset src="${libs.swing-layout.classpath}"/>
+        </jar>
+    </target>
+    <!--
+    <target name="-post-clean" description="restore libs-env after clean">
+        <unzip dest="${build.classes.dir}" description="unpack zip-libs...">
+            <fileset dir="${basedir}/lib/">
+                <include name="*.zip"/>
+            </fileset>
+        </unzip>
+        <unjar dest="${build.classes.dir}" description="unpack jar-libs...">
+            <fileset dir="${basedir}/lib/">
+                <include name="*.jar"/>
+            </fileset>
+        </unjar>
+    </target>
+     -->
+     
+    <!-- wen rolandg, 28.07.2997  -->
+    
 </project>
