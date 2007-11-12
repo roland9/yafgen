@@ -32,10 +32,15 @@
  *      1.1, updated 6. August 2007
  *           - Various enhancements, see README
  *
+ *      1.2, updated 12. October 2007
+ *           - Various enhancements, see README
+ *
  */
 
 package yafgen;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import java.awt.geom.*;
 import java.awt.*;
@@ -105,9 +110,12 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
     private String picasaPassword;
     /** Picasa Webservice Id */
     public static final String picasaWebserviceId = "rgropmair-YaFGen-1.2";
+    /** Picasa ClientName */
+    public static final String picasaClientName = "Client-rgropmair-YaFGen-1.2";
+    private PicasawebService myService = null;
+    private Image myImageNew;
+    private Image myImageAlbum;
 
-    private Image myImage1, myImage2, myImage3;
-    
     /** Creates new form YAFGMainFrame */
     public YaFGenMainFrame() {
         initComponents();
@@ -312,6 +320,30 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
         oldPointMouse = e.getPoint();
     }
 
+    private void getThumbnailFromAlbum(PicasawebService myService, AlbumEntry myAlbumEntry) {
+
+        try {
+            // get photo of first album
+            String albumName = myAlbumEntry.getName();
+            URL photosInAlbumUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + picasaLogon + "/album/" + albumName + "?kind=photo");
+            AlbumFeed myAlbumFeed = myService.getFeed(photosInAlbumUrl, AlbumFeed.class);
+            java.util.List<PhotoEntry> myPhotoList = myAlbumFeed.getPhotoEntries();
+
+            // todo if empty?
+            java.util.List<MediaThumbnail> myThumbnails = myPhotoList.get(0).getMediaGroup().getThumbnails();
+            URL imageUrl = new URL(myThumbnails.get(2).getUrl());
+            Image myThumbImage = ImageIO.read(imageUrl);
+            myImageAlbum = myThumbImage.getScaledInstance(jPanelPicAlbum.getWidth(), jPanelPicAlbum.getHeight(), Image.SCALE_FAST);
+
+            // repaint the frame, so we can see the photo (see class myPhoto)
+            jPicasaUpload.repaint();
+            System.out.println("Album Name: " + albumName + "\nImageUrl: " + imageUrl.toString() + "\n");
+        } catch (MalformedURLException e) {
+        } catch (IOException e) {
+        } catch (ServiceException e) {
+        }
+    }
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -338,16 +370,14 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
         jButtonConnect = new javax.swing.JButton();
         jRememberLogon = new javax.swing.JCheckBox();
         jComboBoxAlbums = new javax.swing.JComboBox();
-        jPanelPic1 = new javax.swing.JPanel();
-        jPanelPic2 = new javax.swing.JPanel();
-        jPanelPic3 = new javax.swing.JPanel();
-        jButtonPreviousPic = new javax.swing.JButton();
-        jButtonNextPic = new javax.swing.JButton();
+        jPanelPicNew = new javax.swing.JPanel();
+        jPanelPicAlbum = new javax.swing.JPanel();
         jButtonUploadPicasa = new javax.swing.JButton();
         jLabel36 = new javax.swing.JLabel();
         jLabelAlbumSummary = new javax.swing.JLabel();
         jLabelAlbumDetails = new javax.swing.JLabel();
         jProgressBarConnect = new javax.swing.JProgressBar();
+        jButtonClosePicasa = new javax.swing.JButton();
         sizeLabel = new javax.swing.JLabel();
         fractalSizeXLabel = new javax.swing.JLabel();
         fractalSizeX = new javax.swing.JTextField();
@@ -494,7 +524,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
 
         jLabel34.setText("Google Email");
 
-        jGoogleEmail.setText("rgropmair");
+        jGoogleEmail.setText("your_google_name");
 
         jLabel35.setText("Password");
 
@@ -509,46 +539,36 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
 
         jComboBoxAlbums.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jPanelPic1.setMaximumSize(new java.awt.Dimension(100, 100));
+        jPanelPicNew.setMaximumSize(new java.awt.Dimension(100, 100));
 
-        org.jdesktop.layout.GroupLayout jPanelPic1Layout = new org.jdesktop.layout.GroupLayout(jPanelPic1);
-        jPanelPic1.setLayout(jPanelPic1Layout);
-        jPanelPic1Layout.setHorizontalGroup(
-            jPanelPic1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 161, Short.MAX_VALUE)
+        org.jdesktop.layout.GroupLayout jPanelPicNewLayout = new org.jdesktop.layout.GroupLayout(jPanelPicNew);
+        jPanelPicNew.setLayout(jPanelPicNewLayout);
+        jPanelPicNewLayout.setHorizontalGroup(
+            jPanelPicNewLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 231, Short.MAX_VALUE)
         );
-        jPanelPic1Layout.setVerticalGroup(
-            jPanelPic1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 137, Short.MAX_VALUE)
-        );
-
-        org.jdesktop.layout.GroupLayout jPanelPic2Layout = new org.jdesktop.layout.GroupLayout(jPanelPic2);
-        jPanelPic2.setLayout(jPanelPic2Layout);
-        jPanelPic2Layout.setHorizontalGroup(
-            jPanelPic2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 162, Short.MAX_VALUE)
-        );
-        jPanelPic2Layout.setVerticalGroup(
-            jPanelPic2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+        jPanelPicNewLayout.setVerticalGroup(
+            jPanelPicNewLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(0, 148, Short.MAX_VALUE)
         );
 
-        org.jdesktop.layout.GroupLayout jPanelPic3Layout = new org.jdesktop.layout.GroupLayout(jPanelPic3);
-        jPanelPic3.setLayout(jPanelPic3Layout);
-        jPanelPic3Layout.setHorizontalGroup(
-            jPanelPic3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 170, Short.MAX_VALUE)
+        org.jdesktop.layout.GroupLayout jPanelPicAlbumLayout = new org.jdesktop.layout.GroupLayout(jPanelPicAlbum);
+        jPanelPicAlbum.setLayout(jPanelPicAlbumLayout);
+        jPanelPicAlbumLayout.setHorizontalGroup(
+            jPanelPicAlbumLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 231, Short.MAX_VALUE)
         );
-        jPanelPic3Layout.setVerticalGroup(
-            jPanelPic3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+        jPanelPicAlbumLayout.setVerticalGroup(
+            jPanelPicAlbumLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(0, 148, Short.MAX_VALUE)
         );
-
-        jButtonPreviousPic.setText("Previous Pictures");
-
-        jButtonNextPic.setText("Next Pictures");
 
         jButtonUploadPicasa.setText("Upload to Picasa");
+        jButtonUploadPicasa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonUploadPicasaActionPerformed(evt);
+            }
+        });
 
         jLabel36.setText("Album");
 
@@ -556,114 +576,98 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
 
         jLabelAlbumDetails.setText("Album Details");
 
+        jButtonClosePicasa.setText("Close");
+        jButtonClosePicasa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClosePicasaActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout jPicasaUploadLayout = new org.jdesktop.layout.GroupLayout(jPicasaUpload.getContentPane());
         jPicasaUpload.getContentPane().setLayout(jPicasaUploadLayout);
         jPicasaUploadLayout.setHorizontalGroup(
             jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPicasaUploadLayout.createSequentialGroup()
-                .add(20, 20, 20)
-                .add(jLabel33)
-                .add(456, 456, 456))
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPicasaUploadLayout.createSequentialGroup()
-                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .add(jPanelPic1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                        .add(jPanelPic2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED))
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(20, 20, 20)
-                        .add(jButtonPreviousPic)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jButtonNextPic)
-                        .add(81, 81, 81)))
-                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(21, 21, 21)
-                        .add(jButtonUploadPicasa)
-                        .addContainerGap())
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jPicasaUploadLayout.createSequentialGroup()
-                        .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                            .add(jPanelPic3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .add(jPicasaUploadLayout.createSequentialGroup()
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(jRememberLogon)
-                                    .add(jProgressBarConnect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                    .add(jLabelAlbumDetails))))
-                        .add(41, 41, 41))))
-            .add(jPicasaUploadLayout.createSequentialGroup()
-                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(20, 20, 20)
-                        .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jLabel34)
-                            .add(jLabel35)))
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .add(jLabel36)))
-                .add(23, 23, 23)
                 .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, jPicasaUploadLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(jLabel33)
+                            .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, jPicasaUploadLayout.createSequentialGroup()
+                                    .add(jPanelPicNew, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .add(jPanelPicAlbum, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, jLabelAlbumSummary, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, jPicasaUploadLayout.createSequentialGroup()
+                                    .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                        .add(jLabel34)
+                                        .add(jLabel35)
+                                        .add(jLabel36))
+                                    .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                    .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                        .add(jPicasaUploadLayout.createSequentialGroup()
+                                            .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                                                .add(jGooglePassword)
+                                                .add(jGoogleEmail, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE))
+                                            .add(36, 36, 36)
+                                            .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                                .add(jPicasaUploadLayout.createSequentialGroup()
+                                                    .add(jButtonConnect)
+                                                    .add(18, 18, 18)
+                                                    .add(jProgressBarConnect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                                                .add(jRememberLogon)))
+                                        .add(jPicasaUploadLayout.createSequentialGroup()
+                                            .add(jComboBoxAlbums, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 294, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                            .add(18, 18, 18)
+                                            .add(jLabelAlbumDetails)))))))
                     .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                            .add(jGooglePassword, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                            .add(jGoogleEmail, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
-                        .add(28, 28, 28)
-                        .add(jButtonConnect)
-                        .add(16, 16, 16))
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(jComboBoxAlbums, 0, 236, Short.MAX_VALUE)
-                        .add(18, 18, 18)))
-                .add(203, 203, 203))
-            .add(jPicasaUploadLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(jLabelAlbumSummary, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 562, Short.MAX_VALUE))
+                        .addContainerGap()
+                        .add(jButtonUploadPicasa)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jButtonClosePicasa)
+                        .add(6, 6, 6)))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
+
+        jPicasaUploadLayout.linkSize(new java.awt.Component[] {jPanelPicAlbum, jPanelPicNew}, org.jdesktop.layout.GroupLayout.HORIZONTAL);
+
         jPicasaUploadLayout.setVerticalGroup(
             jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPicasaUploadLayout.createSequentialGroup()
-                .add(20, 20, 20)
+                .addContainerGap()
                 .add(jLabel33)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(18, 18, 18)
                 .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jLabel34)
                     .add(jGoogleEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jRememberLogon))
-                .add(12, 12, 12)
-                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                         .add(jLabel35)
                         .add(jGooglePassword, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(jButtonConnect))
                     .add(jProgressBarConnect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(33, 33, 33)
                 .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jLabel36)
                     .add(jComboBoxAlbums, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jLabelAlbumDetails))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(18, 18, 18)
                 .add(jLabelAlbumSummary)
-                .add(12, 12, 12)
-                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(jPanelPic3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(jPanelPic2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .add(jPanelPic1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(18, 18, 18)))
-                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(jButtonPreviousPic)
-                        .add(jButtonNextPic))
-                    .add(jPicasaUploadLayout.createSequentialGroup()
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jButtonUploadPicasa)))
-                .add(31, 31, 31))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(jPanelPicNew, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jPanelPicAlbum, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .add(18, 18, 18)
+                .add(jPicasaUploadLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(jButtonUploadPicasa)
+                    .add(jButtonClosePicasa))
+                .add(49, 49, 49))
         );
+
+        jPicasaUploadLayout.linkSize(new java.awt.Component[] {jPanelPicAlbum, jPanelPicNew}, org.jdesktop.layout.GroupLayout.VERTICAL);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Input Parameters");
@@ -764,7 +768,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
         fractalTypeManowar.setMargin(new java.awt.Insets(0, 0, 0, 0));
 
         jLabel32.setFont(new java.awt.Font("Lucida Grande", 0, 10));
-        jLabel32.setText("z[n+1] := z[n]? + c; z[0] := fix");
+        jLabel32.setText("x := x?/y-x?*y+xf;  y := x*y-y/x–x+yf");
 
         org.jdesktop.layout.GroupLayout jPanelMandelJuliaLayout = new org.jdesktop.layout.GroupLayout(jPanelMandelJulia);
         jPanelMandelJulia.setLayout(jPanelMandelJuliaLayout);
@@ -782,7 +786,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
                                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                                     .add(fractalTypeJulia)
                                     .add(fractalTypeMandelbrot))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 49, Short.MAX_VALUE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 9, Short.MAX_VALUE)
                                 .add(jPanelMandelJuliaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                                     .add(jLabel10)
                                     .add(jLabel21)
@@ -1909,21 +1913,26 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
 
         jPicasaUpload.setVisible(true);
 
-        myImage1 = null;
-        myImage2 = null;
-        myImage3 = null;
-        
-        MyPhotoPanel1 myPhotoPanel1 = new MyPhotoPanel1();
-        MyPhotoPanel2 myPhotoPanel2 = new MyPhotoPanel2();
-        MyPhotoPanel3 myPhotoPanel3 = new MyPhotoPanel3();                
-        jPanelPic1.add(myPhotoPanel1, 0);
-        jPanelPic2.add(myPhotoPanel2, 0);
-        jPanelPic3.add(myPhotoPanel3, 0);        
+        myImageNew = null;
+        myImageAlbum = null;
+
+        myImageNew = fractalImage.getBufferedImage().getScaledInstance(jPanelPicNew.getWidth(), jPanelPicNew.getHeight(), Image.SCALE_FAST);
+
+        MyPhotoPanelNew myPhotoPanelNew = new MyPhotoPanelNew();
+        MyPhotoPanelAlbum myPhotoPanelAlbum = new MyPhotoPanelAlbum();
+
+        jPanelPicNew.add(myPhotoPanelNew, 0);
+        jPanelPicAlbum.add(myPhotoPanelAlbum, 0);
+
+        if(!jRememberLogon.isSelected()) {
+            jGoogleEmail.setText("");
+            jGooglePassword.setText("");
+        }
         
         this.pack();
-        myPhotoPanel1.setVisible(true);
-        myPhotoPanel2.setVisible(true);
-        myPhotoPanel3.setVisible(true);
+        myPhotoPanelNew.setVisible(true);
+        myPhotoPanelAlbum.setVisible(true);
+        jPicasaUpload.repaint();
 }//GEN-LAST:event_jMenuItemSaveToPicasaActionPerformed
 
     private void jButtonConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConnectActionPerformed
@@ -1932,7 +1941,7 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
         java.util.List<String> myAlbumNames = new ArrayList<String>();
 
         picasaLogon = jGoogleEmail.getText();
-        picasaPassword = jGooglePassword.getPassword().toString();
+        picasaPassword = new String(jGooglePassword.getPassword());
         // todo check logon and password, only valid characters allowed!
         // todo checkbox remember
         try {
@@ -1940,8 +1949,9 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
             // todo auch die privaten?
             URL albumsUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + picasaLogon + "?kind=album");
 
-            PicasawebService myService = new PicasawebService(picasaWebserviceId);
-
+            myService = new PicasawebService(picasaWebserviceId);
+            myService.setUserCredentials(picasaLogon, picasaPassword);
+            // todo clear array
             jProgressBarConnect.setIndeterminate(true);
             jProgressBarConnect.setMaximum(10);
             jProgressBarConnect.setValue(1);
@@ -1954,47 +1964,14 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
             myAlbumEntries = myUserFeed.getAlbumEntries();
             for (AlbumEntry myAlbumEntry : myAlbumEntries) {
                 String title = myAlbumEntry.getTitle().getPlainText();
-                System.out.println(title);
+                System.out.println("Album name: " + title);
                 myAlbumNames.add(title);
             }
             //todo - check!
             jComboBoxAlbums.setModel(new MyComboBoxModelAlbums(myAlbumNames, myAlbumEntries));
-
             jProgressBarConnect.setValue(5);
 
-            int photoCounter = 0;
-
-            try {
-                // get photo of first album
-                String albumName = myAlbumEntries.get(0).getName();
-                URL photosInAlbumUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + picasaLogon + "/album/" + albumName); // + "?kind=photo");
-                //PhotoFeed myPhotoFeed = myService.getFeed(photosInAlbumUrl, PhotoFeed.class);
-                AlbumFeed myAlbumFeed = myService.getFeed(photosInAlbumUrl, AlbumFeed.class);
-                java.util.List<PhotoEntry> myPhotoList = myAlbumFeed.getPhotoEntries();
-                // todo if only less than 3 pics?
-                java.util.List<MediaThumbnail> myThumbnails = myPhotoList.get(0).getMediaGroup().getThumbnails();
-                URL imageUrl = new URL(myThumbnails.get(0).getUrl());
-                Image myThumbImage = ImageIO.read(imageUrl);
-                myImage1 = myThumbImage.getScaledInstance(jPanelPic1.getWidth(), jPanelPic1.getHeight(), Image.SCALE_FAST);
-                myThumbnails = myPhotoList.get(1).getMediaGroup().getThumbnails();
-                imageUrl = new URL(myThumbnails.get(0).getUrl());
-                myThumbImage = ImageIO.read(imageUrl);
-                myImage2 = myThumbImage.getScaledInstance(jPanelPic1.getWidth(), jPanelPic1.getHeight(), Image.SCALE_FAST);
-                myThumbnails = myPhotoList.get(2).getMediaGroup().getThumbnails();
-                imageUrl = new URL(myThumbnails.get(0).getUrl());
-                myThumbImage = ImageIO.read(imageUrl);
-                myImage3 = myThumbImage.getScaledInstance(jPanelPic1.getWidth(), jPanelPic1.getHeight(), Image.SCALE_FAST);
-
-                // repaint the frame, so we can see the photo (see class myPhoto)
-                jPicasaUpload.repaint();
-
-                System.out.println("Album Name: " + myAlbumEntries.get(0).getName() + "\nPic Number: " 
-                        + photoCounter + "\nId: " + myPhotoList.get(0).getId() + "\n" + "Height: " 
-                        + myPhotoList.get(0).getHeight() + ", Width: " + myPhotoList.get(0).getWidth());
-            } catch (MalformedURLException e) {
-            } catch (IOException e) {
-            } catch (ServiceException e) {
-            }
+            getThumbnailFromAlbum(myService, myAlbumEntries.get(0));
         } catch (java.io.IOException ioe) {
             System.out.println("IOException" + ioe.getMessage());
         } catch (ServiceException se) {
@@ -2002,6 +1979,56 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
         }
 }//GEN-LAST:event_jButtonConnectActionPerformed
 
+    private void jButtonClosePicasaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClosePicasaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonClosePicasaActionPerformed
+
+    private void jButtonUploadPicasaActionPerformed(java.awt.event.ActionEvent evt) {                                                    
+        try {
+            Calendar rightNow = Calendar.getInstance();
+            //temporarily save this image
+            // make sure the paining process is complete
+            if (fractalImage.getFinishedDrawing() != true) {
+                JOptionPane.showMessageDialog(this, "Drawing still in progress. " + "You cannot upload the image, before drawing is finished or interrupted.", "Save Image - Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            String tempdir = System.getProperty("java.io.tmpdir");
+            String filesep = System.getProperty("file.separator");
+
+            String curFile = tempdir + filesep + "YaFGenPic" + rightNow.getTime().toString() + ".jpg";
+
+            File f = new File(curFile);
+            try {
+                f.createNewFile();
+                ImageIO.write(fractalImage.getBufferedImage(), "png", f);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
+
+
+
+            PhotoEntry myPhoto = new PhotoEntry();
+            myPhoto.setTitle(new PlainTextConstruct("YaFGenPic " + rightNow.getTime().toString() + ".jpg"));
+            myPhoto.setDescription(new PlainTextConstruct("Fractal Pic created by YaFGenPic"));
+            myPhoto.setClient(picasaClientName);
+            //todo
+            Person author = new Person("Elizabeth Bennet", null, "liz@gmail.com");
+//            myPhoto.getAuthors().add(author);
+            MediaFileSource myMedia = new MediaFileSource(f, "image/jpeg");
+            myPhoto.setMediaSource(myMedia);
+
+            URL feedUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + picasaLogon + "/album/" + jComboBoxAlbums.getSelectedItem());
+            myPhoto.setTimestamp(new Date());
+
+            PhotoEntry returnedPhoto = myService.insert(feedUrl, myPhoto);
+        } catch (IOException ex) {
+            Logger.getLogger(YaFGenMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ServiceException ex) {
+            Logger.getLogger(YaFGenMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     /** read all the parameters from the input fields in the GUI */
     private void refreshFractalParameters() {
         fPars.setSizeX(Integer.parseInt(fractalSizeX.getText()));
@@ -2117,9 +2144,8 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
     private javax.swing.JTextField fractalYStart;
     private javax.swing.JTabbedPane iterationFunctions;
     private javax.swing.JDialog jAboutDialog;
+    private javax.swing.JButton jButtonClosePicasa;
     private javax.swing.JButton jButtonConnect;
-    private javax.swing.JButton jButtonNextPic;
-    private javax.swing.JButton jButtonPreviousPic;
     private javax.swing.JButton jButtonUploadPicasa;
     private javax.swing.JComboBox jComboBoxAlbums;
     private javax.swing.JTextField jGoogleEmail;
@@ -2192,9 +2218,8 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
     private javax.swing.JPanel jPanelJumper;
     private javax.swing.JPanel jPanelMandelJulia;
     private javax.swing.JPanel jPanelNLF;
-    private javax.swing.JPanel jPanelPic1;
-    private javax.swing.JPanel jPanelPic2;
-    private javax.swing.JPanel jPanelPic3;
+    private javax.swing.JPanel jPanelPicAlbum;
+    private javax.swing.JPanel jPanelPicNew;
     private javax.swing.JDialog jPicasaUpload;
     private javax.swing.JProgressBar jProgressBarConnect;
     private javax.swing.JCheckBox jRememberLogon;
@@ -2436,7 +2461,8 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
             jLabelAlbumDetails.setText(details);
             jLabelAlbumSummary.setText(summary);
 
-            // load thumbnails of this album, and display them
+            // load thumbnail of this album, and display it
+            getThumbnailFromAlbum(myService, myAlbumEntries.get(jComboBoxAlbums.getSelectedIndex()));
             jProgressBarConnect.setValue(7);
 
             jProgressBarConnect.setValue(8);
@@ -2449,49 +2475,38 @@ public class YaFGenMainFrame extends javax.swing.JFrame implements ActionListene
         public void addListDataListener(ListDataListener l) {
         }
     }
-    
-    private class MyPhotoPanel1 extends JPanel {
 
-        MyPhotoPanel1() {
+    private class MyPhotoPanelNew extends JPanel {
+
+        // todo - naming?
+        MyPhotoPanelNew() {
             super();
-            this.setSize(1600, 1200);
+            this.setSize(jPanelPicNew.getSize());
         }
-    
+
+        @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            if (myImage1 != null) {
-                g.drawImage(myImage1, 0, 0, null);
+            if (myImageNew != null) {
+                g.drawImage(myImageNew, 0, 0, null);
             }
         }
     }
-     private class MyPhotoPanel2 extends JPanel {
 
-        MyPhotoPanel2() {
+    private class MyPhotoPanelAlbum extends JPanel {
+
+        MyPhotoPanelAlbum() {
             super();
-            this.setSize(1600, 1200);
+            this.setSize(jPanelPicAlbum.getSize());
         }
-    
+
+        @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            if (myImage2 != null) {
-                g.drawImage(myImage2, 0, 0, null);
-            }
-        }
-    }
-      private class MyPhotoPanel3 extends JPanel {
-
-        MyPhotoPanel3() {
-            super();
-            this.setSize(1600, 1200);
-        }
-    
-        public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-
-            if (myImage3 != null) {
-                g.drawImage(myImage3, 0, 0, null);
+            if (myImageAlbum != null) {
+                g.drawImage(myImageAlbum, 0, 0, null);
             }
         }
     }

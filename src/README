@@ -33,6 +33,11 @@ New Features in Version 1.1, released August 29th, 2007
     * Improvements in user interface (menus, menu shortcuts, visual indication that it's still drawing/calculating, "About" dialog)
     * fixed bug "refresh table IFS" and others 
 
+New Features in Version 1.2, released October 12th, 2007
+
+    * Bugfix: formula Manowar now displayed in configuration dialog
+    * Upload to Picasa
+
 Planned Features for Later Releases
 
     * Applet version
